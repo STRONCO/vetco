@@ -1,0 +1,357 @@
+/* ==========================================================================
+   VETCO — Capa de Design Tokens, Capas CSS (@layer) y Sistema de 3 Temas
+   Temas disponibles: dark (por defecto), light (blanco), purple (beta)
+   ========================================================================== */
+
+@layer reset, tokens, base, layout, components, modules, utilities, print;
+
+@layer tokens {
+  :root,
+  [data-theme="dark"] {
+    color-scheme: dark;
+
+    /* Marca clínica — Modo Oscuro (por defecto) */
+    --brand-primary: #6ea8fe;
+    --brand-primary-strong: #2563eb;
+    --brand-primary-hover: #1d4ed8;
+    --brand-primary-ink: #ffffff;
+    --brand-accent: #2dd4bf;
+    --brand-accent-strong: #0d9488;
+    --brand-accent-ink: #042f2e;
+
+    /* Superficies con profundidad estratificada */
+    --surface-canvas: #0b1120;
+    --surface-sidebar: #070d1a;
+    --surface-topbar: color-mix(in srgb, #0f172a 86%, transparent);
+    --surface-card: #121c30;
+    --surface-elevated: #17243d;
+    --surface-subtle: #0e1627;
+    --surface-input: #0d1526;
+
+    /* Bordes derivados */
+    --border-subtle: color-mix(in srgb, #cbd5e1 14%, transparent);
+    --border-strong: color-mix(in srgb, #cbd5e1 24%, transparent);
+    --border-input: #526785; /* >= 3.1:1 sobre --surface-input */
+    --border-focus: #6ea8fe;
+
+    /* Tipografía con contraste WCAG AA/AAA */
+    --text-primary: #eef4fc;
+    --text-secondary: #aec0d8;
+    --text-muted: #8296b2;
+
+    /* Sidebar */
+    --sidebar-text: #dce7f7;
+    --sidebar-muted: #8ca0be;
+    --sidebar-hover-bg: color-mix(in srgb, var(--brand-primary) 14%, transparent);
+    --sidebar-active-bg: color-mix(in srgb, var(--brand-primary) 20%, transparent);
+    --sidebar-active-border: color-mix(in srgb, var(--brand-primary) 42%, transparent);
+    --sidebar-active-text: #ffffff;
+
+    /* Estados clínicos y semánticos */
+    --status-ok: #34d399;
+    --status-warn: #fbbf24;
+    --status-danger: #f87171;
+    --status-danger-fill: #dc2626;
+    --status-info: #60a5fa;
+    --status-neutral: #94a3b8;
+
+    /* Estados de citas */
+    --st-programada: #60a5fa;
+    --st-confirmada: #34d399;
+    --st-en-consulta: #2dd4bf;
+    --st-completada: #94a3b8;
+    --st-no-asistio: #fbbf24;
+    --st-cancelada: #f87171;
+
+    /* WhatsApp */
+    --whatsapp-bg: #15803d;
+    --whatsapp-hover: #166534;
+    --whatsapp-ink: #ffffff;
+
+    /* Sombras teñidas */
+    --shadow-xs: 0 1px 2px rgba(2, 6, 23, 0.35);
+    --shadow-sm: 0 2px 8px rgba(2, 6, 23, 0.38);
+    --shadow-md: 0 10px 28px rgba(2, 6, 23, 0.48);
+    --shadow-lg: 0 24px 56px rgba(2, 6, 23, 0.65);
+
+    /* Escala tipográfica fluida */
+    --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --font-mono: ui-monospace, "Cascadia Code", "SFMono-Regular", Menlo, Consolas, monospace;
+    --fs-display: clamp(1.4rem, 1.12rem + 1.15vw, 1.95rem);
+    --fs-h2: clamp(1.08rem, 0.98rem + 0.45vw, 1.3rem);
+    --fs-h3: clamp(0.96rem, 0.92rem + 0.2vw, 1.08rem);
+    --fs-kpi: clamp(1.6rem, 1.35rem + 0.95vw, 2.15rem);
+    --fs-body: clamp(0.9375rem, 0.91rem + 0.12vw, 1rem);
+    --fs-sm: 0.855rem;
+    --fs-xs: 0.76rem;
+
+    /* Radios y dimensiones del App Shell */
+    --radius-xs: 6px;
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --radius-xl: 20px;
+    --radius-pill: 999px;
+
+    --sidebar-w: 264px;
+    --sidebar-w-collapsed: 78px;
+    --topbar-h: 64px;
+    --bottom-nav-h: 68px;
+    --target-size: 40px;
+
+    /* Derivados comunes vía color-mix() */
+    --brand-primary-soft: color-mix(in srgb, var(--brand-primary) 16%, var(--surface-card));
+    --brand-accent-soft: color-mix(in srgb, var(--brand-accent) 16%, var(--surface-card));
+    --status-ok-bg: color-mix(in srgb, var(--status-ok) 15%, var(--surface-card));
+    --status-warn-bg: color-mix(in srgb, var(--status-warn) 16%, var(--surface-card));
+    --status-danger-bg: color-mix(in srgb, var(--status-danger) 16%, var(--surface-card));
+    --status-info-bg: color-mix(in srgb, var(--status-info) 16%, var(--surface-card));
+    --status-neutral-bg: color-mix(in srgb, var(--status-neutral) 16%, var(--surface-card));
+  }
+
+  /* ========================================================================
+     TEMA CLARO (BLANCO CLÍNICO)
+     ======================================================================== */
+  [data-theme="light"] {
+    color-scheme: light;
+
+    --brand-primary: #1b3b6f;
+    --brand-primary-strong: #1b3b6f;
+    --brand-primary-hover: #132a50;
+    --brand-primary-ink: #ffffff;
+    --brand-accent: #0f766e;
+    --brand-accent-strong: #0f766e;
+    --brand-accent-ink: #ffffff;
+
+    --surface-canvas: #f3f6fb;
+    --surface-sidebar: #ffffff;
+    --surface-topbar: color-mix(in srgb, #ffffff 88%, transparent);
+    --surface-card: #ffffff;
+    --surface-elevated: #ffffff;
+    --surface-subtle: #f6f9fd;
+    --surface-input: #ffffff;
+
+    --border-subtle: #d6e0ec;
+    --border-strong: #bccadd;
+    --border-input: #718297; /* >= 3.5:1 sobre blanco */
+    --border-focus: #1b3b6f;
+
+    --text-primary: #102033;
+    --text-secondary: #41546b;
+    --text-muted: #586a80; /* >= 5.2:1 sobre blanco */
+
+    --sidebar-text: #1b2f49;
+    --sidebar-muted: #586a80;
+    --sidebar-hover-bg: color-mix(in srgb, var(--brand-primary) 7%, transparent);
+    --sidebar-active-bg: color-mix(in srgb, var(--brand-primary) 11%, #ffffff);
+    --sidebar-active-border: color-mix(in srgb, var(--brand-primary) 26%, transparent);
+    --sidebar-active-text: #1b3b6f;
+
+    --status-ok: #157347;
+    --status-warn: #9a5b00;
+    --status-danger: #c62828;
+    --status-danger-fill: #c62828;
+    --status-info: #1d4ed8;
+    --status-neutral: #475569;
+
+    --st-programada: #1d4ed8;
+    --st-confirmada: #157347;
+    --st-en-consulta: #0f766e;
+    --st-completada: #475569;
+    --st-no-asistio: #9a5b00;
+    --st-cancelada: #c62828;
+
+    --whatsapp-bg: #15803d;
+    --whatsapp-hover: #166534;
+    --whatsapp-ink: #ffffff;
+
+    --shadow-xs: 0 1px 2px rgba(15, 29, 53, 0.05);
+    --shadow-sm: 0 2px 8px rgba(15, 29, 53, 0.06);
+    --shadow-md: 0 10px 26px rgba(15, 29, 53, 0.09);
+    --shadow-lg: 0 20px 44px rgba(15, 29, 53, 0.16);
+
+    --brand-primary-soft: color-mix(in srgb, var(--brand-primary) 10%, #ffffff);
+    --brand-accent-soft: color-mix(in srgb, var(--brand-accent) 11%, #ffffff);
+    --status-ok-bg: color-mix(in srgb, var(--status-ok) 11%, #ffffff);
+    --status-warn-bg: color-mix(in srgb, var(--status-warn) 13%, #ffffff);
+    --status-danger-bg: color-mix(in srgb, var(--status-danger) 10%, #ffffff);
+    --status-info-bg: color-mix(in srgb, var(--status-info) 10%, #ffffff);
+    --status-neutral-bg: color-mix(in srgb, var(--status-neutral) 10%, #ffffff);
+  }
+
+  /* ========================================================================
+     TEMA MORADO (FASE BETA — AMATISTA CLÍNICA)
+     ======================================================================== */
+  [data-theme="purple"] {
+    color-scheme: dark;
+
+    --brand-primary: #c084fc;
+    --brand-primary-strong: #7c3aed;
+    --brand-primary-hover: #6d28d9;
+    --brand-primary-ink: #ffffff;
+    --brand-accent: #38d9c0;
+    --brand-accent-strong: #0d9488;
+    --brand-accent-ink: #042f2e;
+
+    --surface-canvas: #100b1d;
+    --surface-sidebar: #0b0716;
+    --surface-topbar: color-mix(in srgb, #160f29 86%, transparent);
+    --surface-card: #1a122e;
+    --surface-elevated: #23193d;
+    --surface-subtle: #140e24;
+    --surface-input: #130d22;
+
+    --border-subtle: color-mix(in srgb, #d8b4fe 16%, transparent);
+    --border-strong: color-mix(in srgb, #d8b4fe 28%, transparent);
+    --border-input: #7660a3; /* >= 3.2:1 sobre --surface-input */
+    --border-focus: #c084fc;
+
+    --text-primary: #f5f1ff;
+    --text-secondary: #c5b8e3;
+    --text-muted: #9d8ec2; /* >= 5.1:1 sobre --surface-card */
+
+    --sidebar-text: #ede5ff;
+    --sidebar-muted: #a292c8;
+    --sidebar-hover-bg: color-mix(in srgb, #c084fc 14%, transparent);
+    --sidebar-active-bg: color-mix(in srgb, #9333ea 26%, transparent);
+    --sidebar-active-border: color-mix(in srgb, #c084fc 48%, transparent);
+    --sidebar-active-text: #ffffff;
+
+    --status-ok: #34d399;
+    --status-warn: #fbbf24;
+    --status-danger: #fb7185;
+    --status-danger-fill: #e11d48;
+    --status-info: #a78bfa;
+    --status-neutral: #a699c4;
+
+    --st-programada: #a78bfa;
+    --st-confirmada: #34d399;
+    --st-en-consulta: #38d9c0;
+    --st-completada: #a699c4;
+    --st-no-asistio: #fbbf24;
+    --st-cancelada: #fb7185;
+
+    --whatsapp-bg: #15803d;
+    --whatsapp-hover: #166534;
+    --whatsapp-ink: #ffffff;
+
+    --shadow-xs: 0 1px 2px rgba(7, 3, 18, 0.42);
+    --shadow-sm: 0 3px 10px rgba(7, 3, 18, 0.45);
+    --shadow-md: 0 12px 30px rgba(7, 3, 18, 0.55);
+    --shadow-lg: 0 24px 56px rgba(7, 3, 18, 0.72);
+
+    --brand-primary-soft: color-mix(in srgb, #c084fc 17%, var(--surface-card));
+    --brand-accent-soft: color-mix(in srgb, #38d9c0 16%, var(--surface-card));
+    --status-ok-bg: color-mix(in srgb, var(--status-ok) 15%, var(--surface-card));
+    --status-warn-bg: color-mix(in srgb, var(--status-warn) 16%, var(--surface-card));
+    --status-danger-bg: color-mix(in srgb, var(--status-danger) 17%, var(--surface-card));
+    --status-info-bg: color-mix(in srgb, var(--status-info) 18%, var(--surface-card));
+    --status-neutral-bg: color-mix(in srgb, var(--status-neutral) 16%, var(--surface-card));
+  }
+
+  @media (pointer: coarse) {
+    :root {
+      --target-size: 46px;
+    }
+  }
+}
+
+@layer reset {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    scroll-padding-top: calc(var(--topbar-h) + 74px + env(safe-area-inset-top, 0px));
+    scroll-padding-bottom: calc(var(--bottom-nav-h) + 2rem + env(safe-area-inset-bottom, 0px));
+  }
+
+  body {
+    margin: 0;
+    font-family: var(--font-sans);
+    font-size: var(--fs-body);
+    line-height: 1.5;
+    color: var(--text-primary);
+    background-color: var(--surface-canvas);
+    overflow-wrap: break-word;
+    -webkit-font-smoothing: antialiased;
+    transition: background-color 180ms ease, color 180ms ease;
+  }
+
+  img,
+  svg {
+    max-inline-size: 100%;
+    block-size: auto;
+  }
+
+  h1, h2, h3, h4 {
+    margin-block: 0;
+    text-wrap: balance;
+    color: var(--text-primary);
+    line-height: 1.24;
+  }
+
+  p, li {
+    text-wrap: pretty;
+  }
+
+  :where(a, code) {
+    overflow-wrap: anywhere;
+  }
+}
+
+@layer base {
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+
+  .visually-hidden:where(:not(:focus-within, :active)) {
+    position: absolute !important;
+    clip-path: inset(50%) !important;
+    overflow: hidden !important;
+    width: 1px !important;
+    height: 1px !important;
+    margin: -1px !important;
+    padding: 0 !important;
+    border: 0 !important;
+    white-space: nowrap !important;
+  }
+
+  .skip-link {
+    position: fixed;
+    top: -120px;
+    inset-inline-start: 1rem;
+    z-index: 300;
+    background: var(--brand-primary-strong);
+    color: var(--brand-primary-ink);
+    padding: 0.75rem 1.1rem;
+    border-radius: var(--radius-sm);
+    font-weight: 700;
+    text-decoration: none;
+    box-shadow: var(--shadow-md);
+  }
+  .skip-link:focus {
+    top: 0.75rem;
+  }
+
+  :where(a, button, input, select, textarea, [tabindex="0"]):focus-visible {
+    outline: 3px solid var(--border-focus);
+    outline-offset: 2px;
+  }
+
+  :where(
+    button,
+    select,
+    textarea,
+    input:not([type="checkbox"], [type="radio"]),
+    [role="button"],
+    nav a,
+    label:has(input[type="checkbox"], input[type="radio"])
+  ) {
+    min-block-size: var(--target-size);
+    min-inline-size: var(--target-size);
+  }
+}

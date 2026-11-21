@@ -1,0 +1,10 @@
+/* ==========================================================================
+   VETCO — Punto de entrada de compatibilidad CSS
+   La aplicación carga directamente las 5 hojas modulares en index.html
+   ========================================================================== */
+
+@import url("./tokens.css");
+@import url("./layout.css");
+@import url("./components.css");
+@import url("./modules.css");
+@import url("./print.css");

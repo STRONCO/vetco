@@ -1,0 +1,123 @@
+/* ==========================================================================
+   VETCO — Hoja de Impresión Sagrada (Formato Oficial VETCO de 2 Páginas)
+   Aislada en @layer print y protegida contra modo oscuro / morado beta
+   ========================================================================== */
+
+@layer print {
+  .print-only {
+    display: none;
+  }
+
+  @media print {
+    @page {
+      size: letter portrait;
+      margin: 10mm;
+    }
+
+    html,
+    html[data-theme],
+    body {
+      color-scheme: light !important;
+      background: #ffffff !important;
+      color: #000000 !important;
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+      font-size: 9pt !important;
+      line-height: 1.25 !important;
+      margin: 0 !important;
+      padding: 0 !important;
+    }
+
+    .no-print,
+    .app-shell,
+    .app-sidebar,
+    .app-topbar,
+    .mobile-bottom-nav,
+    .toast-region,
+    dialog {
+      display: none !important;
+    }
+
+    .print-only {
+      display: block !important;
+    }
+
+    .print-page {
+      page-break-after: always;
+      break-after: page;
+    }
+
+    .print-page:last-child {
+      page-break-after: auto;
+      break-after: auto;
+    }
+
+    .vetco-doc-table {
+      inline-size: 100%;
+      border-collapse: collapse;
+      margin-block-end: 6pt;
+      table-layout: fixed;
+      background: #ffffff !important;
+      color: #000000 !important;
+    }
+
+    .vetco-doc-table th,
+    .vetco-doc-table td {
+      border: 0.75pt solid #000000 !important;
+      padding: 3pt 5pt;
+      vertical-align: top;
+      text-align: start;
+      overflow-wrap: break-word;
+      color: #000000 !important;
+    }
+
+    .vetco-header-table {
+      margin-block-end: 8pt;
+    }
+
+    .vetco-header-title {
+      text-align: center !important;
+      vertical-align: middle !important;
+      font-weight: 700;
+      font-size: 11pt;
+    }
+
+    .vetco-section-bar {
+      background: #1b3b6f !important;
+      color: #ffffff !important;
+      font-weight: 700;
+      text-align: center !important;
+      text-transform: uppercase;
+      font-size: 8.5pt;
+      letter-spacing: 0.03em;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+
+    .vetco-subhead {
+      background: #edf2f7 !important;
+      color: #000000 !important;
+      font-weight: 700;
+      text-align: center !important;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+
+    .vetco-label {
+      font-weight: 700;
+    }
+
+    .vetco-multiline {
+      min-block-size: 28pt;
+      white-space: pre-wrap;
+    }
+
+    .vetco-multiline-lg {
+      min-block-size: 56pt;
+      white-space: pre-wrap;
+    }
+
+    .vetco-center {
+      text-align: center !important;
+    }
+  }
+}

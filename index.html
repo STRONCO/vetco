@@ -1,0 +1,1506 @@
+<!DOCTYPE html>
+<html lang="es-MX" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="description" content="VETCO — Sistema Veterinario Modular estático: Panel de Control, Historias Clínicas Oficiales y Agenda con Recordatorios.">
+  <meta name="theme-color" content="#0b1120">
+  <title>VETCO — Sistema Veterinario Modular</title>
+  <!-- Arranque síncrono de tema para evitar parpadeo (por defecto: oscuro) -->
+  <script>
+    (function () {
+      try {
+        var raw = localStorage.getItem('vetco_settings_v1');
+        var cfg = raw ? JSON.parse(raw) : null;
+        var theme = cfg && ['dark', 'light', 'purple'].indexOf(cfg.theme) !== -1 ? cfg.theme : 'dark';
+        document.documentElement.setAttribute('data-theme', theme);
+        var colors = { dark: '#0b1120', light: '#1b3b6f', purple: '#100b1d' };
+        var meta = document.querySelector('meta[name="theme-color"]');
+        if (meta) meta.setAttribute('content', colors[theme] || '#0b1120');
+      } catch (e) {}
+    })();
+  </script>
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/modules.css">
+  <link rel="stylesheet" href="css/print.css">
+</head>
+<body>
+  <a href="#main-content" class="skip-link">Saltar al contenido principal</a>
+
+  <!-- ==================== APP SHELL COMPLETO (oculto al imprimir) ==================== -->
+  <div id="app-shell" class="app-shell no-print" data-sidebar="expanded">
+    <!-- SIDEBAR FIJA Y COLAPSABLE (ESCRITORIO) -->
+    <aside class="app-sidebar" aria-label="Menú lateral de VETCO">
+      <div class="sidebar-brand-row">
+        <button type="button" id="btn-brand-home" class="brand-btn" aria-label="VETCO, ir al Panel de Control">
+          <span class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 40 40" width="36" height="36" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect width="40" height="40" rx="10" fill="#1B3B6F"/>
+              <path d="M17 9h6v8h8v6h-8v8h-6v-8H9v-6h8V9z" fill="#FFFFFF"/>
+              <circle cx="20" cy="20" r="3.2" fill="#2DD4BF"/>
+            </svg>
+          </span>
+          <span class="brand-text">
+            <strong>VETCO</strong>
+            <small>Sistema Veterinario</small>
+          </span>
+        </button>
+
+        <button
+          type="button"
+          id="btn-sidebar-toggle"
+          class="sidebar-collapse-btn"
+          aria-label="Colapsar barra lateral"
+          aria-expanded="true"
+          title="Colapsar / expandir menú lateral"
+        >
+          <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+      </div>
+
+      <nav class="sidebar-nav" aria-label="Módulos principales">
+        <span class="sidebar-section-label">Módulos</span>
+
+        <button type="button" class="sidebar-item is-active" data-nav="overview" aria-current="page" title="Panel de Control">
+          <svg aria-hidden="true" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>
+          <span class="sidebar-item-label">Panel de Control</span>
+        </button>
+
+        <button type="button" class="sidebar-item" data-nav="appointments" title="Agenda y Citas">
+          <svg aria-hidden="true" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          <span class="sidebar-item-label">Agenda y Citas</span>
+          <span id="sidebar-appts-badge" class="sidebar-badge is-accent">0</span>
+        </button>
+
+        <button type="button" class="sidebar-item" data-nav="records" title="Historias Clínicas">
+          <svg aria-hidden="true" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+          <span class="sidebar-item-label">Historias Clínicas</span>
+          <span id="sidebar-records-badge" class="sidebar-badge">0</span>
+        </button>
+
+        <span class="sidebar-section-label">Acciones</span>
+
+        <div class="sidebar-quick-group">
+          <button type="button" id="sidebar-new-appt" class="btn btn-accent btn-block" title="Agendar Nueva Cita">
+            <svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="12" y1="12" x2="12" y2="18"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+            <span class="sidebar-cta-text">Nueva Cita</span>
+          </button>
+
+          <button type="button" id="sidebar-new-record" class="btn btn-primary btn-block" title="Nueva Historia Clínica">
+            <svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            <span class="sidebar-cta-text">Nueva Historia</span>
+          </button>
+
+          <button type="button" id="sidebar-open-settings" class="sidebar-item" title="Configuración y Respaldos">
+            <svg aria-hidden="true" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+            <span class="sidebar-item-label">Configuración</span>
+          </button>
+        </div>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="theme-switcher theme-switcher-sidebar" role="group" aria-label="Seleccionar tema visual">
+          <button type="button" class="theme-opt-btn is-active" data-theme-set="dark" aria-pressed="true" title="Tema Oscuro">
+            <span class="theme-swatch swatch-dark" aria-hidden="true"></span>
+            <span class="theme-label-text">Oscuro</span>
+          </button>
+          <button type="button" class="theme-opt-btn" data-theme-set="light" aria-pressed="false" title="Tema Blanco / Claro">
+            <span class="theme-swatch swatch-light" aria-hidden="true"></span>
+            <span class="theme-label-text">Claro</span>
+          </button>
+          <button type="button" class="theme-opt-btn" data-theme-set="purple" aria-pressed="false" title="Tema Morado (Fase Beta)">
+            <span class="theme-swatch swatch-purple" aria-hidden="true"></span>
+            <span class="theme-label-text">Morado</span>
+            <span class="beta-tag">Beta</span>
+          </button>
+        </div>
+
+        <div class="sidebar-clinic-chip" title="Almacenamiento local seguro en navegador">
+          <span class="sidebar-clinic-dot" aria-hidden="true"></span>
+          <div class="sidebar-clinic-info">
+            <strong id="sidebar-clinic-name">VETCO Clínica Veterinaria</strong>
+            <span id="sidebar-clinic-phone">MX +52 · 618 367 8303</span>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ÁREA DE TRABAJO -->
+    <div class="app-workspace">
+      <!-- TOPBAR UTILITARIA -->
+      <header class="app-topbar">
+        <div class="topbar-left">
+          <button type="button" id="btn-mobile-brand" class="brand-btn mobile-brand-btn" aria-label="VETCO, ir al Panel de Control">
+            <span class="brand-mark" aria-hidden="true">
+              <svg viewBox="0 0 40 40" width="32" height="32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect width="40" height="40" rx="10" fill="#1B3B6F"/>
+                <path d="M17 9h6v8h8v6h-8v8h-6v-8H9v-6h8V9z" fill="#FFFFFF"/>
+                <circle cx="20" cy="20" r="3.2" fill="#2DD4BF"/>
+              </svg>
+            </span>
+          </button>
+          <div class="topbar-heading-group">
+            <span id="topbar-kicker" class="topbar-kicker">VETCO · Sistema Clínico</span>
+            <span id="topbar-title" class="topbar-title">Panel de Control</span>
+          </div>
+        </div>
+
+        <div class="topbar-right">
+          <button
+            type="button"
+            id="btn-topbar-theme-cycle"
+            class="icon-btn"
+            aria-label="Cambiar tema visual (Oscuro, Claro, Morado Beta)"
+            title="Cambiar tema visual"
+          >
+            <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+          </button>
+
+          <button
+            type="button"
+            id="btn-open-alerts"
+            class="icon-btn topbar-alert-btn"
+            aria-label="Abrir bandeja de alertas y recordatorios próximos"
+            title="Alertas próximas y recordatorios"
+          >
+            <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+            <span id="topbar-alert-badge" class="alert-dot-badge" hidden>0</span>
+          </button>
+
+          <button
+            type="button"
+            id="btn-topbar-settings"
+            class="icon-btn"
+            aria-label="Abrir configuración y respaldos"
+            title="Configuración y respaldos JSON"
+          >
+            <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          </button>
+
+          <button type="button" id="topbar-new-appt" class="btn btn-accent btn-sm topbar-hide-xs">
+            <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            <span>Nueva Cita</span>
+          </button>
+
+          <button type="button" id="topbar-new-record" class="btn btn-primary btn-sm topbar-hide-xs">
+            <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            <span>Nueva Historia</span>
+          </button>
+        </div>
+      </header>
+
+      <main id="main-content" class="app-main">
+        <!-- ==================== VISTA 1: PANEL DE CONTROL (DASHBOARD) ==================== -->
+        <section id="view-overview" class="view-section" aria-labelledby="overview-heading">
+          <div class="page-hero">
+            <div>
+              <h1 id="overview-heading">Panel de Control</h1>
+              <p id="overview-date-subtitle" class="subtitle">Resumen diario de actividad clínica, agenda de hoy y recordatorios pendientes.</p>
+            </div>
+            <div class="toolbar">
+              <button type="button" id="btn-overview-export-ics" class="btn btn-outline btn-sm" title="Descargar citas de hoy en formato .ics">
+                <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                <span>Agenda hoy (.ics)</span>
+              </button>
+              <button type="button" id="btn-overview-new-appt" class="btn btn-accent btn-sm">
+                <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                <span>Nueva Cita</span>
+              </button>
+              <button type="button" id="btn-overview-new-record" class="btn btn-primary btn-sm">
+                <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                <span>Nueva Historia</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Aviso de borrador pendiente en Dashboard -->
+          <div id="overview-draft-banner" class="draft-banner" hidden>
+            <div class="draft-banner-text">
+              <strong>Tienes un borrador clínico sin guardar</strong>
+              <span id="overview-draft-detail">Puedes retomar la historia clínica donde la dejaste.</span>
+            </div>
+            <div class="draft-banner-actions">
+              <button type="button" class="btn btn-primary btn-sm" data-action="resume-draft">Continuar borrador</button>
+              <button type="button" class="btn btn-outline btn-sm" data-action="discard-draft">Descartar</button>
+            </div>
+          </div>
+
+          <!-- KPIs principales con CSS subgrid -->
+          <div class="kpi-grid" aria-label="Indicadores clave de la clínica">
+            <article class="kpi-card kpi-card--accent">
+              <div class="kpi-head">
+                <span class="kpi-label">Citas de Hoy</span>
+                <span class="kpi-icon" aria-hidden="true">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                </span>
+              </div>
+              <strong id="ov-kpi-today-appts" class="kpi-value">0</strong>
+              <span id="ov-kpi-today-meta" class="kpi-meta">0 confirmadas · 0 en consulta</span>
+            </article>
+
+            <article class="kpi-card kpi-card--warn">
+              <div class="kpi-head">
+                <span class="kpi-label">Recordatorios Pendientes</span>
+                <span class="kpi-icon" aria-hidden="true">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                </span>
+              </div>
+              <strong id="ov-kpi-pending-reminders" class="kpi-value">0</strong>
+              <span class="kpi-meta">Propietarios sin notificar aún</span>
+            </article>
+
+            <article class="kpi-card">
+              <div class="kpi-head">
+                <span class="kpi-label">Historias Clínicas</span>
+                <span class="kpi-icon" aria-hidden="true">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                </span>
+              </div>
+              <strong id="ov-kpi-total-records" class="kpi-value">0</strong>
+              <span id="ov-kpi-species-meta" class="kpi-meta">0 caninos · 0 felinos · 0 otras</span>
+            </article>
+
+            <article class="kpi-card kpi-card--ok">
+              <div class="kpi-head">
+                <span class="kpi-label">Próximas Citas (7 días)</span>
+                <span class="kpi-icon" aria-hidden="true">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                </span>
+              </div>
+              <strong id="ov-kpi-week-appts" class="kpi-value">0</strong>
+              <span class="kpi-meta">Agenda activa programada</span>
+            </article>
+          </div>
+
+          <!-- Grid asimétrico del Dashboard -->
+          <div class="dashboard-grid">
+            <section class="panel-card" aria-labelledby="h-today-agenda">
+              <div class="panel-header">
+                <h2 id="h-today-agenda">Citas de Hoy</h2>
+                <button type="button" class="btn btn-ghost btn-xs" data-nav-go="appointments">Ver agenda completa →</button>
+              </div>
+              <div class="panel-body">
+                <div id="overview-today-list" class="appt-list"></div>
+                <div id="overview-today-empty" class="empty-state" hidden>
+                  <p class="empty-title">Sin citas programadas para hoy</p>
+                  <p class="empty-desc">Cuando registres citas del día aparecerán aquí con acceso directo a WhatsApp e Historia Clínica.</p>
+                </div>
+              </div>
+            </section>
+
+            <div class="dashboard-stack">
+              <section class="panel-card" aria-labelledby="h-upcoming-alerts">
+                <div class="panel-header">
+                  <h2 id="h-upcoming-alerts">Alertas y Recordatorios</h2>
+                  <button type="button" id="btn-overview-enable-notif" class="btn btn-outline btn-xs">Notificaciones</button>
+                </div>
+                <div class="panel-body">
+                  <div id="overview-alerts-list" class="compact-list"></div>
+                </div>
+              </section>
+
+              <section class="panel-card" aria-labelledby="h-recent-patients">
+                <div class="panel-header">
+                  <h2 id="h-recent-patients">Últimos Pacientes</h2>
+                  <button type="button" class="btn btn-ghost btn-xs" data-nav-go="records">Todas las historias →</button>
+                </div>
+                <div class="panel-body">
+                  <div id="overview-recent-patients" class="compact-list"></div>
+                </div>
+              </section>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================== VISTA 2: AGENDA Y CITAS (MÓDULO COMPLETO) ==================== -->
+        <section id="view-appointments" class="view-section" aria-labelledby="appointments-heading" hidden>
+          <div class="page-hero">
+            <div>
+              <h1 id="appointments-heading">Agenda y Citas</h1>
+              <p class="subtitle">Organiza consultas, controles, vacunaciones y cirugías; envía recordatorios por WhatsApp (+52), correo o .ics e inicia historias clínicas en un clic.</p>
+            </div>
+            <div class="toolbar">
+              <button type="button" id="btn-agenda-export-ics" class="btn btn-outline btn-sm" title="Exportar todas las citas activas en formato .ics">
+                <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                <span>Exportar .ics</span>
+              </button>
+              <button type="button" id="btn-agenda-settings" class="btn btn-outline btn-sm">Plantillas</button>
+              <button type="button" id="btn-agenda-new-appt" class="btn btn-accent btn-sm">
+                <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                <span>Nueva Cita</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- KPIs interactivos de Agenda (nativos <button> para teclado WCAG AA) -->
+          <div class="kpi-grid" aria-label="Resumen rápido de agenda">
+            <button type="button" id="ag-kpi-card-today" class="kpi-card kpi-card--accent" title="Ir a las citas de hoy">
+              <div class="kpi-head"><span class="kpi-label">Citas de Hoy</span></div>
+              <strong id="ag-kpi-today" class="kpi-value">0</strong>
+              <span class="kpi-meta">Ver agenda del día</span>
+            </button>
+            <button type="button" id="ag-kpi-card-overdue" class="kpi-card kpi-card--warn" title="Filtrar citas atrasadas">
+              <div class="kpi-head"><span class="kpi-label">Atrasadas</span></div>
+              <strong id="ag-kpi-overdue" class="kpi-value">0</strong>
+              <span class="kpi-meta">Pendientes de atención o cierre</span>
+            </button>
+            <button type="button" id="ag-kpi-card-upcoming" class="kpi-card kpi-card--ok" title="Filtrar citas próximas">
+              <div class="kpi-head"><span class="kpi-label">Próximas</span></div>
+              <strong id="ag-kpi-upcoming" class="kpi-value">0</strong>
+              <span class="kpi-meta">Programadas para próximos días</span>
+            </button>
+            <button type="button" id="ag-kpi-card-unnotified" class="kpi-card" title="Filtrar citas sin notificar">
+              <div class="kpi-head"><span class="kpi-label">Sin Notificar</span></div>
+              <strong id="ag-kpi-unnotified" class="kpi-value">0</strong>
+              <span class="kpi-meta">Recordatorio al propietario pendiente</span>
+            </button>
+          </div>
+
+          <!-- Barra de vistas (Día / Lista / Semanal / Mensual) + Fijar preferida + Navegación temporal -->
+          <div class="agenda-controls-bar">
+            <div class="toolbar">
+              <div class="agenda-view-tabs" role="group" aria-label="Tipo de vista de agenda">
+                <button type="button" class="agenda-tab-btn is-active" data-agenda-view="day" aria-pressed="true">Hoy / Día</button>
+                <button type="button" class="agenda-tab-btn" data-agenda-view="list" aria-pressed="false">Próximas / Lista</button>
+                <button type="button" class="agenda-tab-btn" data-agenda-view="week" aria-pressed="false">Semanal</button>
+                <button type="button" class="agenda-tab-btn" data-agenda-view="month" aria-pressed="false">Mensual</button>
+              </div>
+              <button type="button" id="btn-pin-preferred-view" class="filter-pill-btn" title="Guardar esta vista como la vista inicial de Agenda">
+                ☆ Fijar como preferida
+              </button>
+            </div>
+
+            <div id="agenda-date-nav" class="agenda-date-nav">
+              <button type="button" id="btn-agenda-prev" class="icon-btn" aria-label="Periodo anterior" title="Anterior">
+                <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+              </button>
+              <span id="agenda-date-label" class="agenda-date-label">Hoy</span>
+              <button type="button" id="btn-agenda-today" class="btn btn-outline btn-xs">Hoy</button>
+              <button type="button" id="btn-agenda-next" class="icon-btn" aria-label="Periodo siguiente" title="Siguiente">
+                <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Buscador y filtros por estado, tipo y veterinario -->
+          <div class="panel-card" style="margin-block-end: 1rem;">
+            <search class="search-bar-wrap" style="border-bottom: none;">
+              <form id="agenda-search-form" class="agenda-filters-grid" aria-label="Filtrar y buscar citas">
+                <div class="search-input-group">
+                  <label for="agenda-search-query" class="visually-hidden">Buscar citas por paciente, propietario, teléfono o motivo</label>
+                  <svg class="search-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                  <input
+                    type="search"
+                    id="agenda-search-query"
+                    placeholder="Buscar paciente, propietario, teléfono, motivo..."
+                    autocorrect="off"
+                    autocapitalize="none"
+                    spellcheck="false"
+                  >
+                </div>
+                <div>
+                  <label for="agenda-filter-status" class="visually-hidden">Filtrar por estado</label>
+                  <select id="agenda-filter-status"></select>
+                </div>
+                <div>
+                  <label for="agenda-filter-type" class="visually-hidden">Filtrar por tipo de cita</label>
+                  <select id="agenda-filter-type"></select>
+                </div>
+                <div>
+                  <label for="agenda-filter-vet" class="visually-hidden">Filtrar por veterinario</label>
+                  <select id="agenda-filter-vet"></select>
+                </div>
+              </form>
+
+              <div id="agenda-list-quick-chips" class="agenda-quick-chips" hidden>
+                <button type="button" class="filter-pill-btn is-active" data-list-filter="all" aria-pressed="true">Todas</button>
+                <button type="button" class="filter-pill-btn" data-list-filter="today" aria-pressed="false">Hoy</button>
+                <button type="button" class="filter-pill-btn" data-list-filter="upcoming" aria-pressed="false">Próximas</button>
+                <button type="button" class="filter-pill-btn" data-list-filter="overdue" aria-pressed="false">Atrasadas</button>
+                <button type="button" class="filter-pill-btn" data-list-filter="unnotified" aria-pressed="false">Sin notificar</button>
+              </div>
+            </search>
+          </div>
+
+          <!-- Escenario dinámico de la vista activa -->
+          <div id="agenda-stage"></div>
+        </section>
+
+        <!-- ==================== VISTA 3: HISTORIAS CLÍNICAS (MÓDULO EXISTENTE COMPLETO) ==================== -->
+        <section id="view-records" class="view-section" aria-labelledby="records-heading" hidden>
+          <div class="page-hero">
+            <div>
+              <h1 id="records-heading">Historias Clínicas</h1>
+              <p class="subtitle">Consulta, crea, edita e imprime historias clínicas oficiales VETCO (2 páginas) desde celular, tableta o computadora.</p>
+            </div>
+            <div class="toolbar">
+              <button type="button" id="btn-export-json" class="btn btn-outline btn-sm" title="Descargar respaldo completo (historias y citas) en JSON">
+                <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                <span>Exportar JSON</span>
+              </button>
+              <button type="button" id="btn-import-json" class="btn btn-outline btn-sm" title="Cargar un respaldo JSON (v1 o v2)">
+                <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                <span>Importar JSON</span>
+              </button>
+              <input type="file" id="input-import-file" accept="application/json,.json" class="visually-hidden" aria-label="Seleccionar archivo JSON de respaldo">
+              <button type="button" id="btn-reset-demo" class="btn btn-ghost btn-sm" title="Restaurar los casos de ejemplo originales">
+                Restaurar demo
+              </button>
+            </div>
+          </div>
+
+          <!-- Aviso de borrador pendiente si existe -->
+          <div id="draft-banner" class="draft-banner" hidden>
+            <div class="draft-banner-text">
+              <strong>Tienes un borrador sin guardar</strong>
+              <span id="draft-banner-detail">Puedes continuar diligenciando la historia clínica donde la dejaste.</span>
+            </div>
+            <div class="draft-banner-actions">
+              <button type="button" id="btn-resume-draft" class="btn btn-primary btn-sm">Continuar borrador</button>
+              <button type="button" id="btn-discard-draft" class="btn btn-outline btn-sm">Descartar</button>
+            </div>
+          </div>
+
+          <!-- Indicadores rápidos por especie -->
+          <div class="kpi-grid" aria-label="Resumen de historias clínicas">
+            <article class="kpi-card">
+              <div class="kpi-head">
+                <span class="kpi-label">Total Historias</span>
+              </div>
+              <strong id="kpi-total" class="kpi-value">0</strong>
+              <span class="kpi-meta">Guardadas en este dispositivo</span>
+            </article>
+            <article class="kpi-card kpi-card--accent">
+              <div class="kpi-head">
+                <span class="kpi-label">Caninos</span>
+              </div>
+              <strong id="kpi-caninos" class="kpi-value">0</strong>
+              <span class="kpi-meta">Pacientes registrados</span>
+            </article>
+            <article class="kpi-card kpi-card--ok">
+              <div class="kpi-head">
+                <span class="kpi-label">Felinos</span>
+              </div>
+              <strong id="kpi-felinos" class="kpi-value">0</strong>
+              <span class="kpi-meta">Pacientes registrados</span>
+            </article>
+            <article class="kpi-card kpi-card--warn">
+              <div class="kpi-head">
+                <span class="kpi-label">Otras Especies</span>
+              </div>
+              <strong id="kpi-otras" class="kpi-value">0</strong>
+              <span class="kpi-meta">Aves, exóticos y otros</span>
+            </article>
+          </div>
+
+          <!-- Buscador y filtros semánticos -->
+          <div class="panel-card">
+            <search class="search-bar-wrap">
+              <form id="search-form" class="search-form" aria-label="Buscar historias clínicas">
+                <div class="search-input-group">
+                  <label for="search-query" class="visually-hidden">Buscar por paciente, propietario, número de historia o diagnóstico</label>
+                  <svg class="search-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                  <input
+                    type="search"
+                    id="search-query"
+                    name="q"
+                    placeholder="Buscar por paciente, propietario, documento, N.° historia o diagnóstico..."
+                    autocorrect="off"
+                    autocapitalize="none"
+                    spellcheck="false"
+                    enterkeyhint="search"
+                  >
+                </div>
+                <div class="filter-group">
+                  <label for="filter-especie" class="visually-hidden">Filtrar por especie</label>
+                  <select id="filter-especie" name="especie">
+                    <option value="">Todas las especies</option>
+                    <option value="Canino">Canino</option>
+                    <option value="Felino">Felino</option>
+                    <option value="Otro">Otras especies</option>
+                  </select>
+                </div>
+                <div class="filter-group">
+                  <label for="sort-records" class="visually-hidden">Ordenar registros</label>
+                  <select id="sort-records" name="sort">
+                    <option value="recent">Más recientes primero</option>
+                    <option value="oldest">Más antiguas primero</option>
+                    <option value="patient">Paciente (A–Z)</option>
+                    <option value="hc">N.° Historia Clínica</option>
+                  </select>
+                </div>
+              </form>
+            </search>
+
+            <!-- Tabla responsiva con Container Queries -->
+            <div tabindex="0" role="region" aria-labelledby="records-table-caption" class="table-wrapper records-table-wrapper">
+              <table class="data-table records-table">
+                <caption id="records-table-caption" class="visually-hidden">Listado de historias clínicas veterinarias guardadas</caption>
+                <thead>
+                  <tr>
+                    <th scope="col">N.° Historia</th>
+                    <th scope="col">Fecha</th>
+                    <th scope="col">Paciente</th>
+                    <th scope="col">Propietario</th>
+                    <th scope="col">Motivo / Diagnóstico</th>
+                    <th scope="col">Médico</th>
+                    <th scope="col">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody id="records-tbody">
+                  <!-- Renderizado dinámicamente -->
+                </tbody>
+              </table>
+            </div>
+
+            <div id="records-empty" class="empty-state" hidden>
+              <p class="empty-title">No se encontraron historias clínicas</p>
+              <p class="empty-desc">Prueba con otro término de búsqueda o crea una nueva historia clínica.</p>
+              <button type="button" id="btn-empty-new" class="btn btn-primary">Crear nueva historia</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================== VISTA 4: FORMULARIO HISTORIA CLÍNICA (8 SECCIONES) ==================== -->
+        <section id="view-form" class="view-section" aria-labelledby="form-main-heading" hidden>
+          <!-- Barra contextual del formulario -->
+          <div class="form-topbar">
+            <div class="form-topbar-left">
+              <button type="button" id="btn-back-dashboard" class="btn btn-ghost btn-sm">
+                <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+                <span>Volver</span>
+              </button>
+              <div class="form-title-stack">
+                <h1 id="form-main-heading">Nueva Historia Clínica</h1>
+                <p id="form-live-subtitle" class="form-live-subtitle">Borrador sin paciente asignado</p>
+              </div>
+            </div>
+            <div class="form-topbar-right toolbar">
+              <span id="form-appt-link-pill" class="badge badge-accent" hidden>Vinculada a cita</span>
+              <span id="autosave-status" class="autosave-pill" role="status" aria-live="polite">Listo</span>
+              <button type="button" id="btn-print-current" class="btn btn-outline btn-sm">
+                <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+                <span>Imprimir / PDF</span>
+              </button>
+              <button type="button" id="btn-save-top" class="btn btn-primary btn-sm">
+                <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                <span>Guardar Historia</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Navegación rápida por secciones -->
+          <nav class="section-stepper" aria-label="Secciones de la historia clínica">
+            <a href="#sec-identificacion" class="step-chip is-current">1. Datos Generales</a>
+            <a href="#sec-anamnesicos" class="step-chip">2. Anamnésicos</a>
+            <a href="#sec-motivo" class="step-chip">3. Motivo</a>
+            <a href="#sec-examen-clinico" class="step-chip">4. Examen Clínico</a>
+            <a href="#sec-organos" class="step-chip">5. Órganos y Sistemas</a>
+            <a href="#sec-problemas" class="step-chip">6. Problemas y Dif.</a>
+            <a href="#sec-examenes-comp" class="step-chip">7. Exámenes Comp.</a>
+            <a href="#sec-diagnostico" class="step-chip">8. Diagnóstico y Trat.</a>
+          </nav>
+
+          <div class="form-layout">
+            <form id="clinical-form" class="clinical-form" aria-labelledby="form-main-heading" novalidate>
+              <input type="hidden" id="record-id" name="id">
+              <input type="hidden" id="linked-appointment-id" name="appointmentId">
+
+              <!-- Resumen de errores en envío -->
+              <div id="form-error-summary" class="error-summary" role="alert" tabindex="-1" hidden>
+                <strong>Revisa los campos obligatorios antes de guardar:</strong>
+                <ul id="form-error-list"></ul>
+              </div>
+
+              <!-- ========== SECCIÓN 1: IDENTIFICACIÓN, PROPIETARIO Y PACIENTE ========== -->
+              <section id="sec-identificacion" class="form-card" aria-labelledby="h-identificacion">
+                <div class="card-header">
+                  <span class="section-badge">Página 1</span>
+                  <h2 id="h-identificacion">Encabezado, Propietario y Paciente</h2>
+                </div>
+
+                <div class="grid-2 compact-row">
+                  <div class="field">
+                    <label for="fecha">Fecha de consulta <span class="req" aria-hidden="true">*</span></label>
+                    <input type="date" id="fecha" name="fecha" required data-error="fecha-error" enterkeyhint="next">
+                    <span id="fecha-error" class="error-msg"><span role="img" aria-label="Error">⚠</span> Selecciona la fecha de la consulta.</span>
+                  </div>
+                  <div class="field">
+                    <label for="numeroHistoria">Número Historia Clínica <span class="req" aria-hidden="true">*</span></label>
+                    <input
+                      type="text"
+                      id="numeroHistoria"
+                      name="numeroHistoria"
+                      required
+                      autocorrect="off"
+                      autocapitalize="characters"
+                      spellcheck="false"
+                      data-error="numeroHistoria-error"
+                      enterkeyhint="next"
+                      placeholder="Ej. HC-2026-0001"
+                    >
+                    <span id="numeroHistoria-error" class="error-msg"><span role="img" aria-label="Error">⚠</span> Ingresa el número de historia clínica.</span>
+                  </div>
+                </div>
+
+                <div class="split-panels">
+                  <!-- DATOS DEL PROPIETARIO -->
+                  <fieldset class="sub-panel">
+                    <legend class="sub-panel-title">Datos del Propietario</legend>
+
+                    <div class="field">
+                      <label for="prop-nombres">Nombres y apellidos <span class="req" aria-hidden="true">*</span></label>
+                      <input type="text" id="prop-nombres" name="propNombres" required autocomplete="name" data-error="prop-nombres-error" enterkeyhint="next" placeholder="Nombre completo del propietario">
+                      <span id="prop-nombres-error" class="error-msg"><span role="img" aria-label="Error">⚠</span> Ingresa el nombre del propietario.</span>
+                    </div>
+
+                    <div class="grid-2">
+                      <div class="field">
+                        <label for="prop-documento">Documento Identidad <span class="req" aria-hidden="true">*</span></label>
+                        <input type="text" id="prop-documento" name="propDocumento" required autocorrect="off" autocapitalize="characters" spellcheck="false" data-error="prop-documento-error" enterkeyhint="next" placeholder="INE / CURP / ID">
+                        <span id="prop-documento-error" class="error-msg"><span role="img" aria-label="Error">⚠</span> Ingresa el documento de identidad.</span>
+                      </div>
+                      <div class="field">
+                        <label for="prop-telefono">Teléfono <span class="req" aria-hidden="true">*</span></label>
+                        <input type="tel" id="prop-telefono" name="propTelefono" required autocomplete="tel" inputmode="tel" data-error="prop-telefono-error" enterkeyhint="next" placeholder="Ej. 618 367 8303">
+                        <span id="prop-telefono-error" class="error-msg"><span role="img" aria-label="Error">⚠</span> Ingresa un teléfono de contacto.</span>
+                      </div>
+                    </div>
+
+                    <div class="field">
+                      <label for="prop-direccion">Dirección</label>
+                      <input type="text" id="prop-direccion" name="propDireccion" autocomplete="street-address" enterkeyhint="next" placeholder="Dirección de residencia">
+                    </div>
+
+                    <div class="field">
+                      <label for="prop-email">Correo Electrónico</label>
+                      <span id="prop-email-hint" class="hint">Formato: nombre@correo.com (opcional)</span>
+                      <input type="email" id="prop-email" name="propEmail" autocomplete="email" autocorrect="off" autocapitalize="none" spellcheck="false" aria-describedby="prop-email-hint" data-error="prop-email-error" enterkeyhint="next" placeholder="propietario@correo.mx">
+                      <span id="prop-email-error" class="error-msg"><span role="img" aria-label="Error">⚠</span> Ingresa un correo electrónico válido (ej. nombre@correo.com).</span>
+                    </div>
+                  </fieldset>
+
+                  <!-- DATOS DEL PACIENTE -->
+                  <fieldset class="sub-panel">
+                    <legend class="sub-panel-title">Datos del Paciente</legend>
+
+                    <div class="grid-2">
+                      <div class="field">
+                        <label for="pac-nombre">Nombre del paciente <span class="req" aria-hidden="true">*</span></label>
+                        <input type="text" id="pac-nombre" name="pacNombre" required data-error="pac-nombre-error" enterkeyhint="next" placeholder="Ej. Max, Luna">
+                        <span id="pac-nombre-error" class="error-msg"><span role="img" aria-label="Error">⚠</span> Ingresa el nombre del paciente.</span>
+                      </div>
+
+                      <div class="field">
+                        <fieldset class="inline-radio-fieldset">
+                          <legend class="field-legend">Sexo <span class="req" aria-hidden="true">*</span></legend>
+                          <div class="segmented-control">
+                            <label class="seg-option">
+                              <input type="radio" name="pacSexo" value="Macho" required>
+                              <span>Macho</span>
+                            </label>
+                            <label class="seg-option">
+                              <input type="radio" name="pacSexo" value="Hembra" required>
+                              <span>Hembra</span>
+                            </label>
+                          </div>
+                        </fieldset>
+                      </div>
+                    </div>
+
+                    <div class="grid-2">
+                      <div class="field">
+                        <label for="pac-especie">Especie <span class="req" aria-hidden="true">*</span></label>
+                        <input type="text" id="pac-especie" name="pacEspecie" list="especies-list" required data-error="pac-especie-error" enterkeyhint="next" placeholder="Canino, Felino...">
+                        <datalist id="especies-list">
+                          <option value="Canino"></option>
+                          <option value="Felino"></option>
+                          <option value="Ave"></option>
+                          <option value="Conejo"></option>
+                          <option value="Roedor"></option>
+                          <option value="Reptil"></option>
+                          <option value="Equino"></option>
+                          <option value="Bovino"></option>
+                        </datalist>
+                        <span id="pac-especie-error" class="error-msg"><span role="img" aria-label="Error">⚠</span> Indica la especie del paciente.</span>
+                      </div>
+                      <div class="field">
+                        <label for="pac-raza">Raza</label>
+                        <input type="text" id="pac-raza" name="pacRaza" enterkeyhint="next" placeholder="Ej. Labrador, Criollo">
+                      </div>
+                    </div>
+
+                    <div class="grid-2">
+                      <div class="field">
+                        <label for="pac-nacimiento">Fecha de Nacimiento <span id="pac-edad-badge" class="age-badge" aria-live="polite"></span></label>
+                        <input type="date" id="pac-nacimiento" name="pacNacimiento" enterkeyhint="next">
+                      </div>
+                      <div class="field">
+                        <label for="pac-color">Color / Capa</label>
+                        <input type="text" id="pac-color" name="pacColor" enterkeyhint="next" placeholder="Ej. Dorado, Negro con blanco">
+                      </div>
+                    </div>
+
+                    <div class="field">
+                      <label for="pac-peso">Peso (kg)</label>
+                      <div class="input-with-unit">
+                        <input type="text" id="pac-peso" name="pacPeso" inputmode="decimal" enterkeyhint="next" placeholder="Ej. 12.5">
+                        <span class="unit-tag" aria-hidden="true">kg</span>
+                      </div>
+                    </div>
+                  </fieldset>
+                </div>
+              </section>
+
+              <!-- ========== SECCIÓN 2: ANAMNÉSICOS ========== -->
+              <section id="sec-anamnesicos" class="form-card" aria-labelledby="h-anamnesicos">
+                <div class="card-header">
+                  <span class="section-badge">Anamnesis</span>
+                  <h2 id="h-anamnesicos">Anamnésicos</h2>
+                </div>
+
+                <div class="grid-2">
+                  <div class="field">
+                    <label for="anam-desparasitacion">Última Desparasitación (Fecha, Producto)</label>
+                    <input type="text" id="anam-desparasitacion" name="anamDesparasitacion" enterkeyhint="next" placeholder="Ej. 15/09/2026 - Drontal Plus">
+                  </div>
+                  <div class="field">
+                    <label for="anam-vacunas">Vacunas (Fecha / Marca / Lote)</label>
+                    <input type="text" id="anam-vacunas" name="anamVacunas" enterkeyhint="next" placeholder="Ej. 10/08/2026 - Nobivac DHPPi+RL - Lote A452">
+                  </div>
+                </div>
+
+                <div class="grid-2">
+                  <div class="field">
+                    <label for="anam-enfermedades">Enfermedades Anteriores</label>
+                    <textarea id="anam-enfermedades" name="anamEnfermedades" rows="2" placeholder="Antecedentes patológicos o quirúrgicos..."></textarea>
+                  </div>
+                  <div class="field">
+                    <label for="anam-tratamientos">Tratamientos Previos</label>
+                    <textarea id="anam-tratamientos" name="anamTratamientos" rows="2" placeholder="Medicamentos suministrados antes de la consulta..."></textarea>
+                  </div>
+                </div>
+
+                <div class="grid-2">
+                  <div class="field">
+                    <label for="anam-evolucion">Evolución</label>
+                    <textarea id="anam-evolucion" name="anamEvolucion" rows="2" placeholder="Cómo ha evolucionado el cuadro clínico..."></textarea>
+                  </div>
+                  <div class="field">
+                    <label for="anam-alimentacion">Alimentación</label>
+                    <textarea id="anam-alimentacion" name="anamAlimentacion" rows="2" placeholder="Dieta habitual, concentrado, dieta BARF, frecuencia..."></textarea>
+                  </div>
+                </div>
+
+                <div class="repro-box">
+                  <fieldset class="inline-radio-fieldset">
+                    <legend class="field-legend">Historia Reproductiva</legend>
+                    <div class="segmented-control">
+                      <label class="seg-option">
+                        <input type="radio" name="anamReproductiva" value="Entero">
+                        <span>Entero</span>
+                      </label>
+                      <label class="seg-option">
+                        <input type="radio" name="anamReproductiva" value="Esterilizado">
+                        <span>Esterilizado</span>
+                      </label>
+                      <label class="seg-option">
+                        <input type="radio" name="anamReproductiva" value="">
+                        <span>Sin especificar</span>
+                      </label>
+                    </div>
+                  </fieldset>
+
+                  <div class="grid-2">
+                    <div class="field">
+                      <label for="anam-ultimo-celo">Último Celo</label>
+                      <input type="text" id="anam-ultimo-celo" name="anamUltimoCelo" enterkeyhint="next" placeholder="Fecha o 'No aplica'">
+                    </div>
+                    <div class="field">
+                      <label for="anam-ultimo-parto">Fecha Último Parto</label>
+                      <input type="text" id="anam-ultimo-parto" name="anamUltimoParto" enterkeyhint="next" placeholder="Fecha o 'No aplica'">
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              <!-- ========== SECCIÓN 3: MOTIVO DE CONSULTA ========== -->
+              <section id="sec-motivo" class="form-card" aria-labelledby="h-motivo">
+                <div class="card-header">
+                  <span class="section-badge">Consulta</span>
+                  <h2 id="h-motivo">Motivo de Consulta</h2>
+                </div>
+
+                <div class="field">
+                  <label for="motivo-consulta">Descripción del motivo de consulta <span class="req" aria-hidden="true">*</span></label>
+                  <textarea id="motivo-consulta" name="motivoConsulta" rows="3" required data-error="motivo-error" placeholder="Describe los síntomas reportados por el propietario, inicio y motivo principal de la visita..."></textarea>
+                  <span id="motivo-error" class="error-msg"><span role="img" aria-label="Error">⚠</span> Describe el motivo de la consulta.</span>
+                </div>
+              </section>
+
+              <!-- ========== SECCIÓN 4: EXAMEN CLÍNICO ========== -->
+              <section id="sec-examen-clinico" class="form-card" aria-labelledby="h-examen">
+                <div class="card-header">
+                  <span class="section-badge">Constantes</span>
+                  <h2 id="h-examen">Examen Clínico</h2>
+                </div>
+
+                <div class="vitals-grid">
+                  <div class="field">
+                    <label for="ex-fr">F. Respiratoria</label>
+                    <div class="input-with-unit">
+                      <input type="text" id="ex-fr" name="exFr" inputmode="numeric" enterkeyhint="next" placeholder="Ej. 24">
+                      <span class="unit-tag" aria-hidden="true">/rpm</span>
+                    </div>
+                  </div>
+                  <div class="field">
+                    <label for="ex-fc">F. Cardiaca</label>
+                    <div class="input-with-unit">
+                      <input type="text" id="ex-fc" name="exFc" inputmode="numeric" enterkeyhint="next" placeholder="Ej. 96">
+                      <span class="unit-tag" aria-hidden="true">/lpm</span>
+                    </div>
+                  </div>
+                  <div class="field">
+                    <label for="ex-temp">Temperatura</label>
+                    <div class="input-with-unit">
+                      <input type="text" id="ex-temp" name="exTemp" inputmode="decimal" enterkeyhint="next" placeholder="Ej. 38.5">
+                      <span class="unit-tag" aria-hidden="true">°C</span>
+                    </div>
+                  </div>
+                  <div class="field">
+                    <label for="ex-pulso">Pulso</label>
+                    <input type="text" id="ex-pulso" name="exPulso" enterkeyhint="next" placeholder="Fuerte, concordante...">
+                  </div>
+                </div>
+
+                <div class="grid-3">
+                  <div class="field">
+                    <label for="ex-tlc">Tiempo Llenado Capilar (T.L.C.)</label>
+                    <input type="text" id="ex-tlc" name="exTlc" enterkeyhint="next" placeholder="Ej. < 2 seg">
+                  </div>
+                  <div class="field">
+                    <label for="ex-nodulos">Nódulos Linfáticos</label>
+                    <input type="text" id="ex-nodulos" name="exNodulos" enterkeyhint="next" placeholder="Ej. Normales, reactivos...">
+                  </div>
+                  <div class="field">
+                    <label for="ex-mucosas">Mucosas</label>
+                    <input type="text" id="ex-mucosas" name="exMucosas" enterkeyhint="next" placeholder="Ej. Rosadas húmedas">
+                  </div>
+                </div>
+
+                <fieldset class="attitude-fieldset">
+                  <legend class="field-legend">Actitud y Temperamento</legend>
+                  <div class="choice-chips">
+                    <label class="chip-option">
+                      <input type="radio" name="exActitud" value="Alerta">
+                      <span>Alerta</span>
+                    </label>
+                    <label class="chip-option">
+                      <input type="radio" name="exActitud" value="Letárgico">
+                      <span>Letárgico</span>
+                    </label>
+                    <label class="chip-option">
+                      <input type="radio" name="exActitud" value="Estuporoso">
+                      <span>Estuporoso</span>
+                    </label>
+                    <label class="chip-option">
+                      <input type="radio" name="exActitud" value="Comatoso">
+                      <span>Comatoso</span>
+                    </label>
+                    <label class="chip-option">
+                      <input type="radio" name="exActitud" value="Otro">
+                      <span>Otro</span>
+                    </label>
+                  </div>
+                  <div class="field attitude-other-field">
+                    <label for="ex-actitud-otro">Observación / Otro temperamento</label>
+                    <input type="text" id="ex-actitud-otro" name="exActitudOtro" enterkeyhint="next" placeholder="Ej. Ansioso, dócil, agresivo por dolor...">
+                  </div>
+                </fieldset>
+              </section>
+
+              <!-- ========== SECCIÓN 5: ÓRGANOS Y SISTEMAS ========== -->
+              <section id="sec-organos" class="form-card" aria-labelledby="h-organos">
+                <div class="card-header card-header-split">
+                  <div>
+                    <span class="section-badge">Evaluación por sistemas</span>
+                    <h2 id="h-organos">
+                      <span>Órganos y Sistemas</span>
+                      <span class="badge badge-danger an-alert-chip">Hallazgos AN detectados</span>
+                    </h2>
+                  </div>
+                  <div class="quick-actions toolbar">
+                    <button type="button" id="btn-all-normal" class="btn btn-outline btn-sm">Marcar todos Normal (N)</button>
+                    <button type="button" id="btn-clear-organs" class="btn btn-ghost btn-sm">Limpiar</button>
+                  </div>
+                </div>
+
+                <p class="legend-bar" aria-label="Significado de siglas">
+                  <span><strong class="code-pill code-n">N</strong> Normal</span>
+                  <span><strong class="code-pill code-an">AN</strong> Anormal</span>
+                  <span><strong class="code-pill code-ne">NE</strong> No Examinado</span>
+                </p>
+
+                <div id="organs-grid" class="organs-grid"></div>
+
+                <div class="field mt-md">
+                  <label for="ex-hallazgos">Descripción de los Hallazgos</label>
+                  <textarea id="ex-hallazgos" name="exHallazgos" rows="4" placeholder="Detalla cualquier hallazgo anormal encontrado en el examen físico por órganos y sistemas..."></textarea>
+                </div>
+              </section>
+
+              <!-- ========== SECCIÓN 6: LISTA DE PROBLEMAS Y DIAGNÓSTICOS DIFERENCIALES (PÁGINA 2) ========== -->
+              <section id="sec-problemas" class="form-card" aria-labelledby="h-problemas">
+                <div class="card-header card-header-split">
+                  <div>
+                    <span class="section-badge">Página 2</span>
+                    <h2 id="h-problemas">Lista de Problemas y Diagnósticos Diferenciales</h2>
+                  </div>
+                  <button type="button" id="btn-add-problem-row" class="btn btn-outline btn-sm">+ Agregar fila</button>
+                </div>
+
+                <div class="dual-list-head" aria-hidden="true">
+                  <span>Lista de Problemas</span>
+                  <span>Diagnósticos Diferenciales</span>
+                </div>
+                <div id="problems-list-container" class="dual-list-rows"></div>
+              </section>
+
+              <!-- ========== SECCIÓN 7: EXÁMENES COMPLEMENTARIOS ========== -->
+              <section id="sec-examenes-comp" class="form-card" aria-labelledby="h-examenes-comp">
+                <div class="card-header">
+                  <span class="section-badge">Pruebas Diagnósticas</span>
+                  <h2 id="h-examenes-comp">Exámenes Complementarios</h2>
+                </div>
+                <p class="section-helper">Marca las pruebas solicitadas o realizadas y, si deseas, registra una nota breve en cada una.</p>
+
+                <div id="exams-grid" class="exams-grid"></div>
+
+                <div class="field mt-md">
+                  <label for="desc-pruebas">Descripción Hallazgos Pruebas Diagnósticas</label>
+                  <textarea id="desc-pruebas" name="descPruebas" rows="4" placeholder="Resultados relevantes de laboratorio, imagenología o pruebas complementarias..."></textarea>
+                </div>
+              </section>
+
+              <!-- ========== SECCIÓN 8: DIAGNÓSTICO FINAL, TRATAMIENTOS Y MÉDICO ========== -->
+              <section id="sec-diagnostico" class="form-card" aria-labelledby="h-diagnostico">
+                <div class="card-header">
+                  <span class="section-badge">Resolución</span>
+                  <h2 id="h-diagnostico">Diagnóstico Final, Tratamientos y Médico Veterinario</h2>
+                </div>
+
+                <div class="field">
+                  <label for="diagnostico-final">Diagnóstico Final o Confirmativo</label>
+                  <textarea id="diagnostico-final" name="diagnosticoFinal" rows="3" placeholder="Diagnóstico definitivo o presuntivo principal..."></textarea>
+                </div>
+
+                <!-- Tabla de Tratamientos -->
+                <div class="treatments-block">
+                  <div class="treatments-header">
+                    <h3>Tratamientos</h3>
+                    <button type="button" id="btn-add-treatment" class="btn btn-outline btn-sm">+ Agregar medicamento</button>
+                  </div>
+
+                  <datalist id="vias-list">
+                    <option value="Oral (PO)"></option>
+                    <option value="Subcutánea (SC)"></option>
+                    <option value="Intramuscular (IM)"></option>
+                    <option value="Intravenosa (IV)"></option>
+                    <option value="Tópica"></option>
+                    <option value="Oftálmica"></option>
+                    <option value="Ótica"></option>
+                    <option value="Inhalatoria"></option>
+                  </datalist>
+
+                  <div tabindex="0" role="region" aria-labelledby="treatments-table-caption" class="table-wrapper treatments-table-wrapper">
+                    <table class="data-table treatments-table">
+                      <caption id="treatments-table-caption" class="visually-hidden">Plan terapéutico y medicamentos formulados</caption>
+                      <thead>
+                        <tr>
+                          <th scope="col">Producto Base</th>
+                          <th scope="col">Dosis Básica</th>
+                          <th scope="col">Presentación</th>
+                          <th scope="col">Vía</th>
+                          <th scope="col">Frecuencia y Duración</th>
+                          <th scope="col" class="col-action"><span class="visually-hidden">Eliminar</span></th>
+                        </tr>
+                      </thead>
+                      <tbody id="treatments-tbody"></tbody>
+                    </table>
+                  </div>
+                </div>
+
+                <!-- Médico Veterinario -->
+                <fieldset class="vet-fieldset">
+                  <legend class="sub-panel-title">Médico Veterinario Responsable</legend>
+                  <div class="grid-2">
+                    <div class="field">
+                      <label for="vet-nombre">Médico Veterinario <span class="req" aria-hidden="true">*</span></label>
+                      <input type="text" id="vet-nombre" name="vetNombre" required data-error="vet-nombre-error" enterkeyhint="next" placeholder="Dr. / Dra. Nombre Apellido">
+                      <span id="vet-nombre-error" class="error-msg"><span role="img" aria-label="Error">⚠</span> Ingresa el nombre del médico veterinario.</span>
+                    </div>
+                    <div class="field">
+                      <label for="vet-matricula">Matrícula / Cédula Profesional <span class="req" aria-hidden="true">*</span></label>
+                      <input type="text" id="vet-matricula" name="vetMatricula" required autocorrect="off" autocapitalize="characters" spellcheck="false" data-error="vet-matricula-error" enterkeyhint="done" placeholder="Ej. CED-8424819">
+                      <span id="vet-matricula-error" class="error-msg"><span role="img" aria-label="Error">⚠</span> Ingresa la matrícula o cédula profesional.</span>
+                    </div>
+                  </div>
+                </fieldset>
+
+                <!-- Acciones finales del formulario -->
+                <div class="form-footer-actions toolbar">
+                  <button type="button" id="btn-cancel-form" class="btn btn-outline">Cancelar</button>
+                  <button type="button" id="btn-print-bottom" class="btn btn-outline">Imprimir formato VETCO</button>
+                  <button type="submit" id="btn-submit-form" class="btn btn-primary btn-lg">
+                    Guardar Historia Clínica
+                  </button>
+                </div>
+              </section>
+            </form>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <!-- BARRA DE NAVEGACIÓN INFERIOR TÁCTIL (MÓVIL Y TABLET) -->
+    <nav class="mobile-bottom-nav" aria-label="Navegación móvil principal">
+      <button type="button" class="bottom-nav-btn is-active" data-nav="overview" aria-current="page">
+        <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>
+        <span>Inicio</span>
+      </button>
+      <button type="button" class="bottom-nav-btn" data-nav="appointments">
+        <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        <span>Agenda</span>
+        <span id="mobile-appts-badge" class="bottom-nav-badge">0</span>
+      </button>
+      <button type="button" class="bottom-nav-btn" data-nav="records">
+        <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        <span>Historias</span>
+      </button>
+      <button type="button" id="btn-mobile-quick-new" class="bottom-nav-btn is-cta" aria-label="Crear nuevo registro">
+        <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        <span>Nuevo</span>
+      </button>
+    </nav>
+  </div>
+
+  <!-- ==================== PLANTILLA DE IMPRESIÓN SAGRADA (FORMATO OFICIAL VETCO 2 PÁGINAS) ==================== -->
+  <article id="print-sheet" class="print-only" aria-hidden="true"></article>
+
+  <!-- ==================== MODALES NATIVOS <dialog> ==================== -->
+  <!-- Confirmación destructiva o de transición de estado -->
+  <dialog id="confirm-dialog" class="modal-dialog" aria-labelledby="confirm-dialog-title">
+    <div class="modal-content">
+      <h2 id="confirm-dialog-title">Confirmar acción</h2>
+      <p id="confirm-dialog-message" class="modal-body-text">¿Deseas continuar con esta acción?</p>
+      <form method="dialog" class="modal-actions">
+        <button type="submit" value="cancel" class="btn btn-outline" autofocus>Cancelar</button>
+        <button type="submit" value="confirm" id="confirm-dialog-ok" class="btn btn-danger">Confirmar</button>
+      </form>
+    </div>
+  </dialog>
+
+  <!-- Vista rápida de detalle de una historia clínica -->
+  <dialog id="preview-dialog" class="modal-dialog modal-dialog-lg" closedby="any" aria-labelledby="preview-dialog-title">
+    <div class="modal-header">
+      <div>
+        <h2 id="preview-dialog-title">Resumen de Historia Clínica</h2>
+        <p id="preview-dialog-sub" class="modal-sub"></p>
+      </div>
+      <form method="dialog">
+        <button type="submit" value="close" class="icon-btn" aria-label="Cerrar vista rápida">
+          <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </form>
+    </div>
+    <div id="preview-dialog-body" class="modal-scroll-body"></div>
+    <div class="modal-actions modal-footer-bar">
+      <form method="dialog">
+        <button type="submit" value="close" class="btn btn-outline">Cerrar</button>
+      </form>
+      <button type="button" id="preview-btn-appt" class="btn btn-outline">Agendar cita</button>
+      <button type="button" id="preview-btn-print" class="btn btn-outline">Imprimir / PDF</button>
+      <button type="button" id="preview-btn-edit" class="btn btn-primary" autofocus>Editar Historia</button>
+    </div>
+  </dialog>
+
+  <!-- Bandeja de Alertas Próximas y Notificaciones del Veterinario -->
+  <dialog id="alerts-dialog" class="modal-dialog modal-dialog-md" closedby="any" aria-labelledby="alerts-dialog-title">
+    <div class="modal-header">
+      <div>
+        <h2 id="alerts-dialog-title">Alertas y Recordatorios Próximos</h2>
+        <p class="modal-sub">Citas próximas, retrasos y propietarios pendientes de notificación.</p>
+      </div>
+      <form method="dialog">
+        <button type="submit" value="close" class="icon-btn" aria-label="Cerrar alertas">
+          <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </form>
+    </div>
+    <div class="modal-scroll-body">
+      <div class="flex-between" style="padding:0.75rem 0.9rem; border-radius:var(--radius-md); background:var(--surface-subtle); border:1px solid var(--border-subtle);">
+        <div>
+          <strong style="font-size:0.9rem;">Alertas del navegador (Notification API)</strong>
+          <div id="notif-permission-status" class="hint">Desactivadas mientras la pestaña esté abierta.</div>
+        </div>
+        <button type="button" id="btn-toggle-browser-notif" class="btn btn-outline btn-sm">Activar alertas</button>
+      </div>
+      <div id="alerts-dialog-list" class="compact-list"></div>
+    </div>
+    <div class="modal-actions modal-footer-bar">
+      <button type="button" id="btn-alerts-export-today-ics" class="btn btn-outline btn-sm">Descargar hoy (.ics)</button>
+      <form method="dialog">
+        <button type="submit" value="close" class="btn btn-primary btn-sm">Cerrar</button>
+      </form>
+    </div>
+  </dialog>
+
+  <!-- Modal de Configuración, Temas, Plantilla WhatsApp MX y Respaldos -->
+  <dialog id="settings-dialog" class="modal-dialog modal-dialog-md" closedby="any" aria-labelledby="settings-dialog-title">
+    <div class="modal-header">
+      <div>
+        <h2 id="settings-dialog-title">Configuración y Respaldos</h2>
+        <p class="modal-sub">Personaliza tema visual, datos de clínica (México +52), vista preferida y plantillas.</p>
+      </div>
+      <form method="dialog">
+        <button type="submit" value="close" class="icon-btn" aria-label="Cerrar configuración">
+          <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </form>
+    </div>
+    <form id="settings-form" class="modal-scroll-body">
+      <div class="field">
+        <span class="field-legend">Apariencia / Tema visual</span>
+        <div class="theme-switcher" role="group" aria-label="Elegir tema visual">
+          <button type="button" class="theme-opt-btn" data-theme-set="dark">
+            <span class="theme-swatch swatch-dark" aria-hidden="true"></span>
+            <span>Oscuro</span>
+          </button>
+          <button type="button" class="theme-opt-btn" data-theme-set="light">
+            <span class="theme-swatch swatch-light" aria-hidden="true"></span>
+            <span>Blanco / Claro</span>
+          </button>
+          <button type="button" class="theme-opt-btn" data-theme-set="purple">
+            <span class="theme-swatch swatch-purple" aria-hidden="true"></span>
+            <span>Morado</span>
+            <span class="beta-tag">Beta</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="field">
+          <label for="cfg-clinic-name">Nombre de la clínica</label>
+          <input type="text" id="cfg-clinic-name" name="clinicName" placeholder="VETCO Clínica Veterinaria">
+        </div>
+        <div class="field">
+          <label for="cfg-clinic-phone">Teléfono / WhatsApp clínica (10 dígitos)</label>
+          <input type="tel" id="cfg-clinic-phone" name="clinicPhone" inputmode="tel" placeholder="6183678303">
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="field">
+          <label for="cfg-country-code">LADA / Código de país (WhatsApp)</label>
+          <input type="text" id="cfg-country-code" name="countryCode" inputmode="numeric" placeholder="52">
+        </div>
+        <div class="field">
+          <label for="cfg-preferred-view">Vista preferente de Agenda</label>
+          <select id="cfg-preferred-view" name="preferredAgendaView">
+            <option value="day">Agenda del día</option>
+            <option value="list">Lista filtrable</option>
+            <option value="week">Calendario semanal</option>
+            <option value="month">Calendario mensual</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="cfg-clinic-address">Dirección de la clínica (para .ics y recordatorios)</label>
+        <input type="text" id="cfg-clinic-address" name="clinicAddress" placeholder="Av. 20 de Noviembre #410, Durango, Dgo.">
+      </div>
+
+      <div class="field">
+        <label for="cfg-whatsapp-template">Plantilla de recordatorio (WhatsApp y Correo)</label>
+        <span class="hint">Variables: <code>{propietario}</code>, <code>{paciente}</code>, <code>{fecha}</code>, <code>{hora}</code>, <code>{motivo}</code>, <code>{medico}</code>, <code>{clinica}</code>, <code>{telefonoClinica}</code></span>
+        <textarea id="cfg-whatsapp-template" name="whatsappTemplate" rows="3"></textarea>
+      </div>
+
+      <label class="switch-row">
+        <span class="switch-row-text">
+          <strong>Pasar cita a "En consulta" automáticamente</strong>
+          <span>Al abrir Historia Clínica desde una cita Programada o Confirmada.</span>
+        </span>
+        <input type="checkbox" id="cfg-auto-in-progress" name="autoTransitionInProgress">
+      </label>
+
+      <label class="switch-row">
+        <span class="switch-row-text">
+          <strong>Ofrecer marcar cita como "Completada" al guardar</strong>
+          <span>Al finalizar y guardar la historia clínica vinculada a una cita.</span>
+        </span>
+        <input type="checkbox" id="cfg-prompt-complete" name="promptCompleteOnSave">
+      </label>
+
+      <div class="preview-section">
+        <h3>Respaldo unificado (Historias + Citas + Configuración)</h3>
+        <div class="toolbar">
+          <button type="button" id="btn-cfg-export" class="btn btn-outline btn-sm">Exportar JSON completo</button>
+          <button type="button" id="btn-cfg-import" class="btn btn-outline btn-sm">Importar JSON (v1/v2)</button>
+          <button type="button" id="btn-cfg-reset" class="btn btn-ghost btn-sm">Restaurar datos demo</button>
+        </div>
+      </div>
+    </form>
+    <div class="modal-actions modal-footer-bar">
+      <form method="dialog">
+        <button type="submit" value="cancel" class="btn btn-outline btn-sm">Cancelar</button>
+      </form>
+      <button type="button" id="btn-save-settings" class="btn btn-primary btn-sm">Guardar cambios</button>
+    </div>
+  </dialog>
+
+  <!-- Hoja rápida móvil para botón "+ Nuevo" -->
+  <dialog id="quick-new-dialog" class="modal-dialog" closedby="any" aria-labelledby="quick-new-title">
+    <div class="modal-header">
+      <h2 id="quick-new-title">Acción rápida</h2>
+      <form method="dialog">
+        <button type="submit" value="close" class="icon-btn" aria-label="Cerrar">
+          <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </form>
+    </div>
+    <div class="modal-scroll-body">
+      <div class="quick-new-grid">
+        <button type="button" id="btn-quick-new-appt" class="quick-new-card">
+          <strong>Nueva Cita</strong>
+          <small>Agendar consulta, vacuna, control o cirugía</small>
+        </button>
+        <button type="button" id="btn-quick-new-record" class="quick-new-card">
+          <strong>Nueva Historia</strong>
+          <small>Formulario oficial VETCO de 8 secciones</small>
+        </button>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- Modal Crear / Editar Cita con autocompletado de pacientes existentes -->
+  <dialog id="appointment-dialog" class="modal-dialog modal-dialog-lg" closedby="any" aria-labelledby="appointment-dialog-title">
+    <div class="modal-header">
+      <div>
+        <h2 id="appointment-dialog-title">Agendar Nueva Cita</h2>
+        <p id="appointment-dialog-sub" class="modal-sub">Vincula un paciente existente o captura los datos de un paciente nuevo.</p>
+      </div>
+      <form method="dialog">
+        <button type="submit" value="close" class="icon-btn" aria-label="Cerrar formulario de cita">
+          <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </form>
+    </div>
+
+    <form id="appointment-form" class="modal-scroll-body" novalidate>
+      <input type="hidden" id="appt-id" name="id">
+      <input type="hidden" id="appt-source-record-id" name="sourceRecordId">
+      <input type="hidden" id="appt-linked-record-id" name="linkedRecordId">
+
+      <div id="appt-overlap-warning" class="overlap-warning" role="alert" hidden></div>
+
+      <div class="field">
+        <label for="appt-known-patient">Vincular paciente existente (autocompletado desde Historias Clínicas)</label>
+        <select id="appt-known-patient"></select>
+      </div>
+
+      <datalist id="known-patients-datalist"></datalist>
+      <datalist id="known-vets-datalist"></datalist>
+
+      <div class="grid-3">
+        <div class="field">
+          <label for="appt-fecha">Fecha <span class="req" aria-hidden="true">*</span></label>
+          <input type="date" id="appt-fecha" required data-error="appt-fecha-error">
+          <span id="appt-fecha-error" class="error-msg">⚠ Selecciona la fecha de la cita.</span>
+        </div>
+        <div class="field">
+          <label for="appt-hora">Hora <span class="req" aria-hidden="true">*</span></label>
+          <input type="time" id="appt-hora" required data-error="appt-hora-error">
+          <span id="appt-hora-error" class="error-msg">⚠ Indica la hora de la cita.</span>
+        </div>
+        <div class="field">
+          <label for="appt-duracion">Duración</label>
+          <select id="appt-duracion">
+            <option value="15">15 minutos</option>
+            <option value="30" selected>30 minutos</option>
+            <option value="45">45 minutos</option>
+            <option value="60">60 minutos</option>
+            <option value="90">90 minutos</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="grid-3">
+        <div class="field">
+          <label for="appt-tipo">Tipo de cita <span class="req" aria-hidden="true">*</span></label>
+          <select id="appt-tipo" required></select>
+        </div>
+        <div class="field">
+          <label for="appt-prioridad">Prioridad</label>
+          <select id="appt-prioridad">
+            <option value="normal">Normal</option>
+            <option value="urgente">Urgente</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="appt-estado">Estado</label>
+          <select id="appt-estado"></select>
+        </div>
+      </div>
+
+      <div class="split-panels">
+        <fieldset class="sub-panel">
+          <legend class="sub-panel-title">Paciente</legend>
+          <div class="field">
+            <label for="appt-pac-nombre">Nombre del paciente <span class="req" aria-hidden="true">*</span></label>
+            <input type="text" id="appt-pac-nombre" list="known-patients-datalist" required data-error="appt-pac-nombre-error" placeholder="Ej. Max, Luna, Kira">
+            <span id="appt-pac-nombre-error" class="error-msg">⚠ Ingresa el nombre del paciente.</span>
+          </div>
+          <div class="grid-2">
+            <div class="field">
+              <label for="appt-pac-especie">Especie <span class="req" aria-hidden="true">*</span></label>
+              <input type="text" id="appt-pac-especie" list="especies-list" required data-error="appt-pac-especie-error" placeholder="Canino, Felino...">
+              <span id="appt-pac-especie-error" class="error-msg">⚠ Indica la especie.</span>
+            </div>
+            <div class="field">
+              <label for="appt-pac-sexo">Sexo</label>
+              <select id="appt-pac-sexo">
+                <option value="">Sin especificar</option>
+                <option value="Macho">Macho</option>
+                <option value="Hembra">Hembra</option>
+              </select>
+            </div>
+          </div>
+          <div class="field">
+            <label for="appt-pac-raza">Raza</label>
+            <input type="text" id="appt-pac-raza" placeholder="Ej. Golden Retriever, Criollo">
+          </div>
+        </fieldset>
+
+        <fieldset class="sub-panel">
+          <legend class="sub-panel-title">Propietario</legend>
+          <div class="field">
+            <label for="appt-prop-nombres">Nombre del propietario <span class="req" aria-hidden="true">*</span></label>
+            <input type="text" id="appt-prop-nombres" required data-error="appt-prop-nombres-error" placeholder="Nombre completo">
+            <span id="appt-prop-nombres-error" class="error-msg">⚠ Ingresa el nombre del propietario.</span>
+          </div>
+          <div class="grid-2">
+            <div class="field">
+              <label for="appt-prop-telefono">Teléfono / WhatsApp <span class="req" aria-hidden="true">*</span></label>
+              <input type="tel" id="appt-prop-telefono" required inputmode="tel" data-error="appt-prop-tel-error" placeholder="618 367 8303">
+              <span id="appt-prop-tel-error" class="error-msg">⚠ Ingresa un teléfono de contacto.</span>
+            </div>
+            <div class="field">
+              <label for="appt-prop-documento">Documento / ID</label>
+              <input type="text" id="appt-prop-documento" placeholder="Opcional">
+            </div>
+          </div>
+          <div class="field">
+            <label for="appt-prop-email">Correo electrónico</label>
+            <input type="email" id="appt-prop-email" placeholder="propietario@correo.mx">
+          </div>
+        </fieldset>
+      </div>
+
+      <div class="grid-2">
+        <div class="field">
+          <label for="appt-vet-nombre">Veterinario asignado <span class="req" aria-hidden="true">*</span></label>
+          <input type="text" id="appt-vet-nombre" list="known-vets-datalist" required data-error="appt-vet-error" placeholder="Dr. / Dra. Nombre Apellido">
+          <span id="appt-vet-error" class="error-msg">⚠ Indica el veterinario responsable.</span>
+        </div>
+        <div class="field">
+          <label for="appt-vet-matricula">Cédula / Matrícula</label>
+          <input type="text" id="appt-vet-matricula" placeholder="Ej. CED-8424819">
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="appt-motivo">Motivo de la cita <span class="req" aria-hidden="true">*</span></label>
+        <textarea id="appt-motivo" rows="2" required data-error="appt-motivo-error" placeholder="Ej. Refuerzo anual de vacuna, control post-tratamiento, síntomas..."></textarea>
+        <span id="appt-motivo-error" class="error-msg">⚠ Describe brevemente el motivo de la cita.</span>
+      </div>
+
+      <div class="field">
+        <label for="appt-notas">Notas internas de preparación (opcional)</label>
+        <textarea id="appt-notas" rows="2" placeholder="Indicaciones para el equipo veterinario, ayuno, cartilla..."></textarea>
+      </div>
+    </form>
+
+    <div class="modal-actions modal-footer-bar">
+      <form method="dialog">
+        <button type="submit" value="cancel" class="btn btn-outline btn-sm">Cancelar</button>
+      </form>
+      <button type="button" id="btn-appt-save-submit" class="btn btn-primary btn-sm">Guardar Cita</button>
+    </div>
+  </dialog>
+
+  <!-- Modal Recordatorio al Propietario (WhatsApp, Correo, .ics, Google Cal, Copiar) -->
+  <dialog id="reminder-dialog" class="modal-dialog modal-dialog-md" closedby="any" aria-labelledby="reminder-dialog-title">
+    <div class="modal-header">
+      <div>
+        <h2 id="reminder-dialog-title">Recordatorio de Cita</h2>
+        <p id="rem-patient-meta" class="modal-sub"></p>
+      </div>
+      <form method="dialog">
+        <button type="submit" value="close" class="icon-btn" aria-label="Cerrar recordatorio">
+          <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </form>
+    </div>
+
+    <div class="modal-scroll-body">
+      <div class="reminder-preview-meta">
+        <small id="rem-owner-meta" class="text-secondary"></small>
+        <span id="rem-status-badge" class="badge badge-warn">Pendiente</span>
+      </div>
+
+      <div class="field">
+        <div class="flex-between">
+          <label for="rem-message-text">Mensaje editable para el propietario</label>
+          <button type="button" id="rem-btn-reset-tpl" class="btn btn-ghost btn-xs">Restaurar plantilla</button>
+        </div>
+        <textarea id="rem-message-text" rows="4"></textarea>
+      </div>
+
+      <div class="reminder-channels-grid">
+        <a id="rem-btn-wa" href="#" target="_blank" rel="noopener noreferrer" class="btn btn-whatsapp btn-sm">Enviar WhatsApp</a>
+        <a id="rem-btn-mail" href="#" class="btn btn-outline btn-sm">Enviar por Correo</a>
+        <button type="button" id="rem-btn-ics" class="btn btn-outline btn-sm">Descargar .ics</button>
+        <a id="rem-btn-gcal" href="#" target="_blank" rel="noopener noreferrer" class="btn btn-outline btn-sm">Google Calendar</a>
+      </div>
+
+      <div class="toolbar">
+        <button type="button" id="rem-btn-copy" class="btn btn-ghost btn-xs">Copiar mensaje</button>
+        <button type="button" id="rem-toggle-manual" class="btn btn-ghost btn-xs">Marcar enviado manualmente</button>
+      </div>
+    </div>
+
+    <div class="modal-actions modal-footer-bar">
+      <form method="dialog">
+        <button type="submit" value="close" class="btn btn-primary btn-sm">Listo</button>
+      </form>
+    </div>
+  </dialog>
+
+  <!-- Región accesible para notificaciones toast -->
+  <div id="toast-region" class="toast-region no-print" role="region" aria-label="Notificaciones"></div>
+
+  <!-- Región live oculta para respaldo de ariaNotify() -->
+  <p class="visually-hidden">Anuncios del sistema</p>
+  <div id="sr-announcer" class="visually-hidden" aria-live="polite" aria-atomic="true"></div>
+
+  <script defer src="js/demo-data.js"></script>
+  <script defer src="js/storage.js"></script>
+  <script defer src="js/accessibility.js"></script>
+  <script defer src="js/reminders.js"></script>
+  <script defer src="js/appointments.js"></script>
+  <script defer src="js/app.js"></script>
+</body>
+</html>
