@@ -177,6 +177,11 @@
   // ------------------------------------------------------------------------
   function syncThemeUI(themeName) {
     const active = A11y.applyTheme(themeName);
+    const shortNames = { dark: 'Oscuro', light: 'Claro', purple: 'Morado' };
+    const topbarThemeLabel = document.getElementById('topbar-theme-label');
+    if (topbarThemeLabel) {
+      topbarThemeLabel.textContent = shortNames[active] || 'Oscuro';
+    }
     document.querySelectorAll('[data-theme-set]').forEach((btn) => {
       const isMatch = btn.getAttribute('data-theme-set') === active;
       btn.classList.toggle('is-active', isMatch);
@@ -421,7 +426,22 @@
       .slice(0, 4);
 
     if (recent.length === 0) {
-      overviewRecentPatients.innerHTML = '<p class="text-muted">Aún no hay pacientes registrados.</p>';
+      const empty = document.createElement('div');
+      empty.className = 'empty-state empty-state--compact';
+      empty.innerHTML = `
+        <div class="empty-icon" aria-hidden="true">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        </div>
+        <p class="empty-title">Sin pacientes registrados aún</p>
+        <p class="empty-desc">Crea la primera historia clínica para ver aquí los accesos rápidos.</p>
+      `;
+      const btnAdd = document.createElement('button');
+      btnAdd.type = 'button';
+      btnAdd.className = 'btn btn-primary btn-xs';
+      btnAdd.textContent = '+ Nueva Historia';
+      btnAdd.addEventListener('click', openNewRecordForm);
+      empty.append(btnAdd);
+      overviewRecentPatients.append(empty);
     } else {
       for (const rec of recent) {
         const item = document.createElement('div');
@@ -463,7 +483,15 @@
     containerEl.innerHTML = '';
 
     if (items.length === 0) {
-      containerEl.innerHTML = '<p class="text-muted" style="margin:0;">Sin alertas urgentes ni pendientes en las próximas 24 horas.</p>';
+      containerEl.innerHTML = `
+        <div class="empty-state empty-state--compact">
+          <div class="empty-icon empty-icon--ok" aria-hidden="true">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          </div>
+          <p class="empty-title">Todo al día</p>
+          <p class="empty-desc">Sin alertas urgentes ni recordatorios pendientes en las próximas 24 horas.</p>
+        </div>
+      `;
       return;
     }
 
@@ -898,6 +926,7 @@
 
     formHeading.textContent = headingText || (r.id ? 'Editar Historia Clínica' : 'Nueva Historia Clínica');
     autosaveStatus.textContent = r.id ? 'Editando registro guardado' : 'Nuevo borrador';
+    autosaveStatus.dataset.state = r.id ? 'saved' : 'idle';
     updateAgeBadge();
     updateLiveSubtitle();
   }
@@ -1023,6 +1052,8 @@
 
     recordsTbody.innerHTML = '';
     if (filtered.length === 0) {
+      const clearBtn = document.getElementById('btn-records-clear-filters');
+      if (clearBtn) clearBtn.hidden = !(q || especieFilter);
       recordsEmpty.hidden = false;
       return;
     }
@@ -1291,7 +1322,8 @@
     }
   }
 
-  async function toggleBrowserNotifications() {
+  async function toggleBrowserNotifications(ev) {
+    const triggerBtn = ev && ev.currentTarget && ev.currentTarget.classList ? ev.currentTarget : null;
     const cfg = Storage.getSettings();
     if (cfg.browserNotificationsEnabled) {
       Storage.saveSettings({ browserNotificationsEnabled: false });
@@ -1301,20 +1333,32 @@
       return;
     }
 
-    const perm = await Reminders.requestNotificationPermission();
-    if (perm === 'granted') {
-      Storage.saveSettings({ browserNotificationsEnabled: true });
-      startReminderWatcher();
-      syncNotifButtonsUI();
-      A11y.showToast('Notificaciones del navegador activadas mientras VETCO esté abierto.', 'success');
-    } else if (perm === 'unsupported') {
-      Storage.saveSettings({ browserNotificationsEnabled: true });
-      startReminderWatcher();
-      syncNotifButtonsUI();
-      A11y.showToast('Usando avisos internos en pantalla (Notification API no disponible).', 'success');
-    } else {
-      A11y.showToast('Permiso de notificaciones denegado en el navegador.', 'error');
-      syncNotifButtonsUI();
+    if (triggerBtn) {
+      triggerBtn.classList.add('is-loading');
+      triggerBtn.setAttribute('aria-busy', 'true');
+    }
+
+    try {
+      const perm = await Reminders.requestNotificationPermission();
+      if (perm === 'granted') {
+        Storage.saveSettings({ browserNotificationsEnabled: true });
+        startReminderWatcher();
+        syncNotifButtonsUI();
+        A11y.showToast('Notificaciones del navegador activadas mientras VETCO esté abierto.', 'success');
+      } else if (perm === 'unsupported') {
+        Storage.saveSettings({ browserNotificationsEnabled: true });
+        startReminderWatcher();
+        syncNotifButtonsUI();
+        A11y.showToast('Usando avisos internos en pantalla (Notification API no disponible).', 'success');
+      } else {
+        A11y.showToast('Permiso de notificaciones denegado en el navegador.', 'error');
+        syncNotifButtonsUI();
+      }
+    } finally {
+      if (triggerBtn) {
+        triggerBtn.classList.remove('is-loading');
+        triggerBtn.removeAttribute('aria-busy');
+      }
     }
   }
 
@@ -1369,11 +1413,13 @@
   // ------------------------------------------------------------------------
   function scheduleDraftSave() {
     clearTimeout(draftDebounceTimer);
+    autosaveStatus.dataset.state = 'saving';
     autosaveStatus.textContent = 'Guardando borrador...';
     draftDebounceTimer = setTimeout(() => {
       const data = collectFormData();
       Storage.saveDraft(data);
       const time = new Date().toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' });
+      autosaveStatus.dataset.state = 'saved';
       autosaveStatus.textContent = `Borrador guardado ${time}`;
     }, 500);
   }
@@ -1843,6 +1889,9 @@
     document.getElementById('sidebar-new-appt').addEventListener('click', () => Appointments.openNewAppointmentModal());
     document.getElementById('topbar-new-appt').addEventListener('click', () => Appointments.openNewAppointmentModal());
     document.getElementById('btn-overview-new-appt').addEventListener('click', () => Appointments.openNewAppointmentModal());
+    document.querySelectorAll('[data-action="new-appt"]').forEach((b) =>
+      b.addEventListener('click', () => Appointments.openNewAppointmentModal())
+    );
 
     document.getElementById('sidebar-new-record').addEventListener('click', openNewRecordForm);
     document.getElementById('topbar-new-record').addEventListener('click', openNewRecordForm);
@@ -1902,6 +1951,12 @@
     searchQuery.addEventListener('input', renderRecordsView);
     filterEspecie.addEventListener('change', renderRecordsView);
     sortRecords.addEventListener('change', renderRecordsView);
+    document.getElementById('btn-records-clear-filters')?.addEventListener('click', () => {
+      searchQuery.value = '';
+      filterEspecie.value = '';
+      renderRecordsView();
+      searchQuery.focus();
+    });
 
     // Borradores (Dashboard + Historias)
     document.getElementById('btn-resume-draft').addEventListener('click', resumeDraftAction);

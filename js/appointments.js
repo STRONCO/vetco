@@ -472,15 +472,21 @@
       const empty = document.createElement('div');
       empty.className = 'empty-state';
       empty.innerHTML = `
+        <div class="empty-icon" aria-hidden="true">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        </div>
         <p class="empty-title">No hay citas para esta fecha</p>
         <p class="empty-desc">Cambia de día, ajusta los filtros o agenda una nueva cita para ${formatDisplayDate(selectedDate)}.</p>
       `;
+      const actions = document.createElement('div');
+      actions.className = 'empty-actions';
       const btnEmptyAdd = document.createElement('button');
       btnEmptyAdd.type = 'button';
       btnEmptyAdd.className = 'btn btn-primary btn-sm';
       btnEmptyAdd.textContent = '+ Agendar cita';
       btnEmptyAdd.addEventListener('click', () => openNewAppointmentModal({ fecha: selectedDate }));
-      empty.append(btnEmptyAdd);
+      actions.append(btnEmptyAdd);
+      empty.append(actions);
       body.append(empty);
     } else {
       const list = document.createElement('div');
@@ -545,18 +551,46 @@
     body.className = 'panel-body';
 
     if (items.length === 0) {
+      const hasActiveFilters = Boolean(
+        (els.searchInput?.value || '').trim() ||
+          els.statusFilter?.value ||
+          els.typeFilter?.value ||
+          els.vetFilter?.value ||
+          listQuickFilter !== 'all'
+      );
       const empty = document.createElement('div');
       empty.className = 'empty-state';
       empty.innerHTML = `
+        <div class="empty-icon" aria-hidden="true">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        </div>
         <p class="empty-title">No se encontraron citas con estos filtros</p>
-        <p class="empty-desc">Prueba limpiando los filtros o registra una nueva cita veterinaria.</p>
+        <p class="empty-desc">Prueba limpiando los filtros activos o registra una nueva cita veterinaria.</p>
       `;
+      const actions = document.createElement('div');
+      actions.className = 'empty-actions';
+      if (hasActiveFilters) {
+        const btnReset = document.createElement('button');
+        btnReset.type = 'button';
+        btnReset.className = 'btn btn-outline btn-sm';
+        btnReset.textContent = 'Limpiar filtros';
+        btnReset.addEventListener('click', () => {
+          if (els.searchInput) els.searchInput.value = '';
+          if (els.statusFilter) els.statusFilter.value = '';
+          if (els.typeFilter) els.typeFilter.value = '';
+          if (els.vetFilter) els.vetFilter.value = '';
+          listQuickFilter = 'all';
+          render();
+        });
+        actions.append(btnReset);
+      }
       const btnNew = document.createElement('button');
       btnNew.type = 'button';
       btnNew.className = 'btn btn-primary btn-sm';
       btnNew.textContent = '+ Nueva Cita';
       btnNew.addEventListener('click', () => openNewAppointmentModal());
-      empty.append(btnNew);
+      actions.append(btnNew);
+      empty.append(actions);
       body.append(empty);
     } else {
       const list = document.createElement('div');
@@ -606,10 +640,7 @@
 
       const addBtn = document.createElement('button');
       addBtn.type = 'button';
-      addBtn.className = 'icon-btn';
-      addBtn.style.minInlineSize = '34px';
-      addBtn.style.minBlockSize = '34px';
-      addBtn.style.padding = '0.2rem';
+      addBtn.className = 'icon-btn week-add-btn';
       addBtn.setAttribute('aria-label', `Agendar cita el ${formatDisplayDate(dayIso)}`);
       addBtn.title = `Agendar el ${formatDisplayDate(dayIso)}`;
       addBtn.textContent = '+';
@@ -735,6 +766,12 @@
       btn.addEventListener('click', () => {
         selectedDate = iso;
         render();
+        if (window.innerWidth < 920) {
+          const detailPanel = els.stage.querySelector('.month-day-detail');
+          if (detailPanel) {
+            detailPanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          }
+        }
       });
 
       grid.append(btn);
@@ -745,7 +782,7 @@
 
     // Columna derecha: Detalle del día seleccionado
     const sidePanel = document.createElement('div');
-    sidePanel.className = 'panel-card';
+    sidePanel.className = 'panel-card month-day-detail';
     const sideHead = document.createElement('div');
     sideHead.className = 'panel-header';
     const sideTitle = document.createElement('h2');
@@ -765,7 +802,22 @@
     );
 
     if (selectedAppts.length === 0) {
-      sideBody.innerHTML = `<p class="text-muted" style="margin:0;">Sin citas programadas para el ${formatDisplayDate(selectedDate)}.</p>`;
+      const empty = document.createElement('div');
+      empty.className = 'empty-state empty-state--compact';
+      empty.innerHTML = `
+        <div class="empty-icon" aria-hidden="true">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        </div>
+        <p class="empty-title">Día libre</p>
+        <p class="empty-desc">Sin citas programadas para el ${formatDisplayDate(selectedDate)}.</p>
+      `;
+      const btnNewDay = document.createElement('button');
+      btnNewDay.type = 'button';
+      btnNewDay.className = 'btn btn-primary btn-xs';
+      btnNewDay.textContent = '+ Agendar este día';
+      btnNewDay.addEventListener('click', () => openNewAppointmentModal({ fecha: selectedDate }));
+      empty.append(btnNewDay);
+      sideBody.append(empty);
     } else {
       const list = document.createElement('div');
       list.className = 'appt-list';

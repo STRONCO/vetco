@@ -19,9 +19,9 @@
   let announcedField = null;
 
   const THEME_META_COLORS = {
-    dark: '#0b1120',
-    light: '#1b3b6f',
-    purple: '#100b1d'
+    dark: '#090f1a',
+    light: '#0f766e',
+    purple: '#0e091a'
   };
 
   function applyTheme(themeName) {
@@ -267,7 +267,7 @@
   function showToast(message, variant) {
     if (!toastRegion || !message) return;
 
-    if (hasOpenModalDialog()) {
+    if (hasOpenModalDialog() && !supportsPopover()) {
       announceSR(message, 100);
       return;
     }
@@ -281,8 +281,25 @@
       toast.setAttribute('popover', 'manual');
     }
 
+    const iconWrap = document.createElement('span');
+    iconWrap.className = 'toast-icon';
+    iconWrap.setAttribute('aria-hidden', 'true');
+    if (variant === 'success') {
+      iconWrap.innerHTML =
+        '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>';
+    } else if (variant === 'error') {
+      iconWrap.innerHTML =
+        '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>';
+    } else {
+      iconWrap.innerHTML =
+        '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>';
+    }
+
+    const bodyWrap = document.createElement('div');
+    bodyWrap.className = 'toast-body';
     const textSpan = document.createElement('span');
     textSpan.textContent = message;
+    bodyWrap.append(iconWrap, textSpan);
 
     const closeBtn = document.createElement('button');
     closeBtn.type = 'button';
@@ -294,7 +311,11 @@
       closeBtn.setAttribute('popovertargetaction', 'hide');
     }
 
-    toast.append(textSpan, closeBtn);
+    const progress = document.createElement('span');
+    progress.className = 'toast-progress';
+    progress.setAttribute('aria-hidden', 'true');
+
+    toast.append(bodyWrap, closeBtn, progress);
     toastRegion.append(toast);
 
     let dismissTimer = null;

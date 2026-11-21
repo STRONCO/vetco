@@ -1,6 +1,7 @@
 /* ==========================================================================
-   VETCO — Capa de Design Tokens, Capas CSS (@layer) y Sistema de 3 Temas
-   Temas disponibles: dark (por defecto), light (blanco), purple (beta)
+   VETCO — Sistema de Design Tokens, Capas CSS (@layer) y 3 Temas Clínicos
+   Arquitectura: Mobile-First · 100% Estático · WCAG AA/AAA
+   Temas: dark (Oscuro Clínico), light (Claro Clínico), purple (Amatista Beta)
    ========================================================================== */
 
 @layer reset, tokens, base, layout, components, modules, utilities, print;
@@ -10,46 +11,50 @@
   [data-theme="dark"] {
     color-scheme: dark;
 
-    /* Marca clínica — Modo Oscuro (por defecto) */
-    --brand-primary: #6ea8fe;
-    --brand-primary-strong: #2563eb;
-    --brand-primary-hover: #1d4ed8;
+    /* ==================== IDENTIDAD CLÍNICA (OSCURO CLÍNICO) ==================== */
+    --brand-primary: #2dd4bf;
+    --brand-primary-strong: #0d9488;
+    --brand-primary-hover: #0f766e;
     --brand-primary-ink: #ffffff;
-    --brand-accent: #2dd4bf;
-    --brand-accent-strong: #0d9488;
-    --brand-accent-ink: #042f2e;
+    --brand-accent: #60a5fa;
+    --brand-accent-strong: #2563eb;
+    --brand-accent-hover: #1d4ed8;
+    --brand-accent-ink: #ffffff;
 
-    /* Superficies con profundidad estratificada */
-    --surface-canvas: #0b1120;
-    --surface-sidebar: #070d1a;
-    --surface-topbar: color-mix(in srgb, #0f172a 86%, transparent);
-    --surface-card: #121c30;
-    --surface-elevated: #17243d;
-    --surface-subtle: #0e1627;
-    --surface-input: #0d1526;
+    /* Superficies estratificadas (4 niveles de profundidad perceptibles) */
+    --surface-canvas: #090f1a;
+    --surface-sidebar: #060b14;
+    --surface-topbar: color-mix(in srgb, #0b1322 86%, transparent);
+    --surface-sunken: #0c1424;
+    --surface-subtle: #0e1729;
+    --surface-card: #121d31;
+    --surface-elevated: #192741;
+    --surface-input: #0b1322;
 
-    /* Bordes derivados */
-    --border-subtle: color-mix(in srgb, #cbd5e1 14%, transparent);
-    --border-strong: color-mix(in srgb, #cbd5e1 24%, transparent);
-    --border-input: #526785; /* >= 3.1:1 sobre --surface-input */
-    --border-focus: #6ea8fe;
+    /* Bordes y contornos */
+    --border-subtle: color-mix(in srgb, #cbd5e1 13%, transparent);
+    --border-strong: color-mix(in srgb, #cbd5e1 25%, transparent);
+    --border-input: #475d7a; /* >= 3.2:1 sobre --surface-input */
+    --border-focus: #2dd4bf;
 
-    /* Tipografía con contraste WCAG AA/AAA */
-    --text-primary: #eef4fc;
-    --text-secondary: #aec0d8;
-    --text-muted: #8296b2;
+    /* Tipografía con alto contraste WCAG AA/AAA */
+    --text-primary: #f1f5f9;
+    --text-secondary: #b4c5db;
+    --text-muted: #8499b5;
 
-    /* Sidebar */
-    --sidebar-text: #dce7f7;
-    --sidebar-muted: #8ca0be;
-    --sidebar-hover-bg: color-mix(in srgb, var(--brand-primary) 14%, transparent);
-    --sidebar-active-bg: color-mix(in srgb, var(--brand-primary) 20%, transparent);
-    --sidebar-active-border: color-mix(in srgb, var(--brand-primary) 42%, transparent);
+    /* Navegación lateral (Sidebar) */
+    --sidebar-text: #e2ecf8;
+    --sidebar-muted: #8aa0bd;
+    --sidebar-hover-bg: color-mix(in srgb, var(--brand-primary) 12%, transparent);
+    --sidebar-active-bg: color-mix(in srgb, var(--brand-primary) 17%, transparent);
+    --sidebar-active-border: color-mix(in srgb, var(--brand-primary) 38%, transparent);
     --sidebar-active-text: #ffffff;
 
-    /* Estados clínicos y semánticos */
+    /* Estados semánticos y clínicos */
     --status-ok: #34d399;
+    --status-ok-fill: #059669;
     --status-warn: #fbbf24;
+    --status-warn-fill: #d97706;
     --status-danger: #f87171;
     --status-danger-fill: #dc2626;
     --status-info: #60a5fa;
@@ -63,29 +68,59 @@
     --st-no-asistio: #fbbf24;
     --st-cancelada: #f87171;
 
-    /* WhatsApp */
-    --whatsapp-bg: #15803d;
-    --whatsapp-hover: #166534;
+    /* WhatsApp MX */
+    --whatsapp-bg: #16a34a;
+    --whatsapp-hover: #15803d;
     --whatsapp-ink: #ffffff;
 
-    /* Sombras teñidas */
-    --shadow-xs: 0 1px 2px rgba(2, 6, 23, 0.35);
-    --shadow-sm: 0 2px 8px rgba(2, 6, 23, 0.38);
-    --shadow-md: 0 10px 28px rgba(2, 6, 23, 0.48);
-    --shadow-lg: 0 24px 56px rgba(2, 6, 23, 0.65);
+    /* Etiqueta Beta */
+    --beta-bg: color-mix(in srgb, #a855f7 22%, transparent);
+    --beta-text: #c084fc;
 
-    /* Escala tipográfica fluida */
-    --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    /* Toasts */
+    --toast-bg: #18253d;
+    --toast-ink: #f1f5f9;
+    --toast-success-bg: #065f46;
+    --toast-success-border: #34d399;
+    --toast-error-bg: #991b1b;
+    --toast-error-border: #f87171;
+
+    /* Sombras multicapa y brillos sutiles de profundidad */
+    --surface-sheen: rgba(255, 255, 255, 0.055);
+    --border-glass: rgba(203, 213, 225, 0.16);
+    --focus-ring: color-mix(in srgb, var(--border-focus) 32%, transparent);
+    --select-chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+    --shadow-xs: 0 1px 2px rgba(2, 6, 23, 0.34), 0 1px 1px rgba(2, 6, 23, 0.2);
+    --shadow-sm: 0 1px 2px rgba(2, 6, 23, 0.32), 0 6px 16px -4px rgba(2, 6, 23, 0.44);
+    --shadow-md: 0 4px 10px -2px rgba(2, 6, 23, 0.4), 0 16px 32px -8px rgba(2, 6, 23, 0.56);
+    --shadow-lg: 0 8px 20px -4px rgba(2, 6, 23, 0.5), 0 28px 60px -12px rgba(2, 6, 23, 0.74);
+    --shadow-glow-primary: 0 0 0 1px color-mix(in srgb, var(--brand-primary) 28%, transparent), 0 8px 24px -8px color-mix(in srgb, var(--brand-primary) 35%, transparent);
+
+    /* ==================== TIPOGRAFÍA MODERNA Y ESCALA FLUIDA ==================== */
+    --font-display: "Plus Jakarta Sans", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     --font-mono: ui-monospace, "Cascadia Code", "SFMono-Regular", Menlo, Consolas, monospace;
-    --fs-display: clamp(1.4rem, 1.12rem + 1.15vw, 1.95rem);
-    --fs-h2: clamp(1.08rem, 0.98rem + 0.45vw, 1.3rem);
-    --fs-h3: clamp(0.96rem, 0.92rem + 0.2vw, 1.08rem);
-    --fs-kpi: clamp(1.6rem, 1.35rem + 0.95vw, 2.15rem);
-    --fs-body: clamp(0.9375rem, 0.91rem + 0.12vw, 1rem);
-    --fs-sm: 0.855rem;
-    --fs-xs: 0.76rem;
 
-    /* Radios y dimensiones del App Shell */
+    --fs-display: clamp(1.375rem, 1.15rem + 1.1vw, 1.9rem);
+    --fs-h2: clamp(1.06rem, 0.96rem + 0.42vw, 1.28rem);
+    --fs-h3: clamp(0.95rem, 0.91rem + 0.2vw, 1.06rem);
+    --fs-kpi: clamp(1.55rem, 1.32rem + 0.95vw, 2.15rem);
+    --fs-body: clamp(0.9375rem, 0.91rem + 0.12vw, 1rem);
+    --fs-sm: 0.875rem;
+    --fs-xs: 0.75rem;
+
+    /* ==================== ESCALA DE ESPACIADO ==================== */
+    --space-1: 0.25rem;  /* 4px */
+    --space-2: 0.5rem;   /* 8px */
+    --space-3: 0.75rem;  /* 12px */
+    --space-4: 1rem;     /* 16px */
+    --space-5: 1.25rem;  /* 20px */
+    --space-6: 1.5rem;   /* 24px */
+    --space-8: 2rem;     /* 32px */
+    --space-10: 2.5rem;  /* 40px */
+    --space-12: 3rem;    /* 48px */
+
+    /* ==================== RADIOS DE BORDE ==================== */
     --radius-xs: 6px;
     --radius-sm: 8px;
     --radius-md: 12px;
@@ -93,87 +128,123 @@
     --radius-xl: 20px;
     --radius-pill: 999px;
 
-    --sidebar-w: 264px;
+    /* ==================== DIMENSIONES DEL APP SHELL ==================== */
+    --sidebar-w: 268px;
     --sidebar-w-collapsed: 78px;
-    --topbar-h: 64px;
-    --bottom-nav-h: 68px;
-    --target-size: 40px;
+    --topbar-h: 62px;
+    --bottom-nav-h: 70px;
+    --container-max: 1340px;
+    --target-size: 44px; /* Mobile-first: mínimo táctil 44x44px */
 
-    /* Derivados comunes vía color-mix() */
-    --brand-primary-soft: color-mix(in srgb, var(--brand-primary) 16%, var(--surface-card));
-    --brand-accent-soft: color-mix(in srgb, var(--brand-accent) 16%, var(--surface-card));
-    --status-ok-bg: color-mix(in srgb, var(--status-ok) 15%, var(--surface-card));
-    --status-warn-bg: color-mix(in srgb, var(--status-warn) 16%, var(--surface-card));
-    --status-danger-bg: color-mix(in srgb, var(--status-danger) 16%, var(--surface-card));
-    --status-info-bg: color-mix(in srgb, var(--status-info) 16%, var(--surface-card));
-    --status-neutral-bg: color-mix(in srgb, var(--status-neutral) 16%, var(--surface-card));
+    /* ==================== CAPAS Z-INDEX Y MOVIMIENTO ==================== */
+    --z-sticky: 25;
+    --z-topbar: 40;
+    --z-sidebar: 45;
+    --z-bottom-nav: 60;
+    --z-toast: 140;
+    --z-skip: 300;
+
+    --dur-fast: 130ms;
+    --dur-base: 200ms;
+    --dur-slow: 300ms;
+    --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+    --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+    --ease-press: cubic-bezier(0.4, 0, 0.2, 1);
+
+    /* ==================== DERIVADOS SEMÁNTICOS (color-mix) ==================== */
+    --brand-primary-soft: color-mix(in srgb, var(--brand-primary) 14%, var(--surface-card));
+    --brand-accent-soft: color-mix(in srgb, var(--brand-accent) 15%, var(--surface-card));
+    --status-ok-bg: color-mix(in srgb, var(--status-ok) 14%, var(--surface-card));
+    --status-warn-bg: color-mix(in srgb, var(--status-warn) 15%, var(--surface-card));
+    --status-danger-bg: color-mix(in srgb, var(--status-danger) 15%, var(--surface-card));
+    --status-info-bg: color-mix(in srgb, var(--status-info) 15%, var(--surface-card));
+    --status-neutral-bg: color-mix(in srgb, var(--status-neutral) 15%, var(--surface-card));
   }
 
   /* ========================================================================
-     TEMA CLARO (BLANCO CLÍNICO)
+     TEMA CLARO (CLÍNICO BLANCO DE ALTO CONTRASTE)
      ======================================================================== */
   [data-theme="light"] {
     color-scheme: light;
 
-    --brand-primary: #1b3b6f;
-    --brand-primary-strong: #1b3b6f;
-    --brand-primary-hover: #132a50;
+    --brand-primary: #0f766e;
+    --brand-primary-strong: #0f766e;
+    --brand-primary-hover: #115e59;
     --brand-primary-ink: #ffffff;
-    --brand-accent: #0f766e;
-    --brand-accent-strong: #0f766e;
+    --brand-accent: #1e40af;
+    --brand-accent-strong: #1e40af;
+    --brand-accent-hover: #1e3a8a;
     --brand-accent-ink: #ffffff;
 
-    --surface-canvas: #f3f6fb;
+    --surface-canvas: #f3f6f9;
     --surface-sidebar: #ffffff;
     --surface-topbar: color-mix(in srgb, #ffffff 88%, transparent);
+    --surface-sunken: #edf2f7;
+    --surface-subtle: #f7fafc;
     --surface-card: #ffffff;
     --surface-elevated: #ffffff;
-    --surface-subtle: #f6f9fd;
     --surface-input: #ffffff;
 
-    --border-subtle: #d6e0ec;
-    --border-strong: #bccadd;
-    --border-input: #718297; /* >= 3.5:1 sobre blanco */
-    --border-focus: #1b3b6f;
+    --border-subtle: #d9e3ec;
+    --border-strong: #bccad8;
+    --border-input: #6d7f94; /* >= 3.8:1 sobre blanco */
+    --border-focus: #0f766e;
 
-    --text-primary: #102033;
-    --text-secondary: #41546b;
-    --text-muted: #586a80; /* >= 5.2:1 sobre blanco */
+    --text-primary: #0f1f2e;
+    --text-secondary: #3b4f64;
+    --text-muted: #586c82; /* >= 5.1:1 sobre blanco */
 
-    --sidebar-text: #1b2f49;
-    --sidebar-muted: #586a80;
+    --sidebar-text: #16283b;
+    --sidebar-muted: #586c82;
     --sidebar-hover-bg: color-mix(in srgb, var(--brand-primary) 7%, transparent);
     --sidebar-active-bg: color-mix(in srgb, var(--brand-primary) 11%, #ffffff);
-    --sidebar-active-border: color-mix(in srgb, var(--brand-primary) 26%, transparent);
-    --sidebar-active-text: #1b3b6f;
+    --sidebar-active-border: color-mix(in srgb, var(--brand-primary) 28%, transparent);
+    --sidebar-active-text: #0f766e;
 
-    --status-ok: #157347;
-    --status-warn: #9a5b00;
+    --status-ok: #15803d;
+    --status-ok-fill: #15803d;
+    --status-warn: #a15207;
+    --status-warn-fill: #b45309;
     --status-danger: #c62828;
-    --status-danger-fill: #c62828;
+    --status-danger-fill: #dc2626;
     --status-info: #1d4ed8;
     --status-neutral: #475569;
 
     --st-programada: #1d4ed8;
-    --st-confirmada: #157347;
+    --st-confirmada: #15803d;
     --st-en-consulta: #0f766e;
     --st-completada: #475569;
-    --st-no-asistio: #9a5b00;
+    --st-no-asistio: #a15207;
     --st-cancelada: #c62828;
 
     --whatsapp-bg: #15803d;
     --whatsapp-hover: #166534;
     --whatsapp-ink: #ffffff;
 
-    --shadow-xs: 0 1px 2px rgba(15, 29, 53, 0.05);
-    --shadow-sm: 0 2px 8px rgba(15, 29, 53, 0.06);
-    --shadow-md: 0 10px 26px rgba(15, 29, 53, 0.09);
-    --shadow-lg: 0 20px 44px rgba(15, 29, 53, 0.16);
+    --beta-bg: color-mix(in srgb, #7c3aed 13%, #ffffff);
+    --beta-text: #6d28d9;
+
+    --toast-bg: #0f1f2e;
+    --toast-ink: #ffffff;
+    --toast-success-bg: #115e59;
+    --toast-success-border: #2dd4bf;
+    --toast-error-bg: #b91c1c;
+    --toast-error-border: #fca5a5;
+
+    --surface-sheen: rgba(255, 255, 255, 0.85);
+    --border-glass: rgba(15, 31, 46, 0.1);
+    --focus-ring: color-mix(in srgb, var(--border-focus) 24%, transparent);
+    --select-chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23586c82' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+    --shadow-xs: 0 1px 2px rgba(15, 31, 46, 0.05), 0 1px 1px rgba(15, 31, 46, 0.03);
+    --shadow-sm: 0 1px 2px rgba(15, 31, 46, 0.04), 0 4px 12px -2px rgba(15, 31, 46, 0.07);
+    --shadow-md: 0 4px 10px -2px rgba(15, 31, 46, 0.06), 0 14px 28px -6px rgba(15, 31, 46, 0.11);
+    --shadow-lg: 0 8px 20px -4px rgba(15, 31, 46, 0.08), 0 24px 48px -10px rgba(15, 31, 46, 0.18);
+    --shadow-glow-primary: 0 0 0 1px color-mix(in srgb, var(--brand-primary) 24%, transparent), 0 8px 22px -8px color-mix(in srgb, var(--brand-primary) 26%, transparent);
 
     --brand-primary-soft: color-mix(in srgb, var(--brand-primary) 10%, #ffffff);
-    --brand-accent-soft: color-mix(in srgb, var(--brand-accent) 11%, #ffffff);
+    --brand-accent-soft: color-mix(in srgb, var(--brand-accent) 10%, #ffffff);
     --status-ok-bg: color-mix(in srgb, var(--status-ok) 11%, #ffffff);
-    --status-warn-bg: color-mix(in srgb, var(--status-warn) 13%, #ffffff);
+    --status-warn-bg: color-mix(in srgb, var(--status-warn) 12%, #ffffff);
     --status-danger-bg: color-mix(in srgb, var(--status-danger) 10%, #ffffff);
     --status-info-bg: color-mix(in srgb, var(--status-info) 10%, #ffffff);
     --status-neutral-bg: color-mix(in srgb, var(--status-neutral) 10%, #ffffff);
@@ -189,36 +260,40 @@
     --brand-primary-strong: #7c3aed;
     --brand-primary-hover: #6d28d9;
     --brand-primary-ink: #ffffff;
-    --brand-accent: #38d9c0;
+    --brand-accent: #2dd4bf;
     --brand-accent-strong: #0d9488;
-    --brand-accent-ink: #042f2e;
+    --brand-accent-hover: #0f766e;
+    --brand-accent-ink: #ffffff;
 
-    --surface-canvas: #100b1d;
-    --surface-sidebar: #0b0716;
-    --surface-topbar: color-mix(in srgb, #160f29 86%, transparent);
-    --surface-card: #1a122e;
-    --surface-elevated: #23193d;
-    --surface-subtle: #140e24;
-    --surface-input: #130d22;
+    --surface-canvas: #0e091a;
+    --surface-sidebar: #090612;
+    --surface-topbar: color-mix(in srgb, #140d26 86%, transparent);
+    --surface-sunken: #120c22;
+    --surface-subtle: #150f28;
+    --surface-card: #1b1331;
+    --surface-elevated: #241a40;
+    --surface-input: #110b20;
 
-    --border-subtle: color-mix(in srgb, #d8b4fe 16%, transparent);
+    --border-subtle: color-mix(in srgb, #d8b4fe 15%, transparent);
     --border-strong: color-mix(in srgb, #d8b4fe 28%, transparent);
-    --border-input: #7660a3; /* >= 3.2:1 sobre --surface-input */
+    --border-input: #7560a3;
     --border-focus: #c084fc;
 
-    --text-primary: #f5f1ff;
-    --text-secondary: #c5b8e3;
-    --text-muted: #9d8ec2; /* >= 5.1:1 sobre --surface-card */
+    --text-primary: #f6f2ff;
+    --text-secondary: #c7bbe3;
+    --text-muted: #9e8fc4;
 
-    --sidebar-text: #ede5ff;
-    --sidebar-muted: #a292c8;
+    --sidebar-text: #efe8ff;
+    --sidebar-muted: #a494ca;
     --sidebar-hover-bg: color-mix(in srgb, #c084fc 14%, transparent);
     --sidebar-active-bg: color-mix(in srgb, #9333ea 26%, transparent);
-    --sidebar-active-border: color-mix(in srgb, #c084fc 48%, transparent);
+    --sidebar-active-border: color-mix(in srgb, #c084fc 46%, transparent);
     --sidebar-active-text: #ffffff;
 
     --status-ok: #34d399;
+    --status-ok-fill: #059669;
     --status-warn: #fbbf24;
+    --status-warn-fill: #d97706;
     --status-danger: #fb7185;
     --status-danger-fill: #e11d48;
     --status-info: #a78bfa;
@@ -226,27 +301,49 @@
 
     --st-programada: #a78bfa;
     --st-confirmada: #34d399;
-    --st-en-consulta: #38d9c0;
+    --st-en-consulta: #2dd4bf;
     --st-completada: #a699c4;
     --st-no-asistio: #fbbf24;
     --st-cancelada: #fb7185;
 
-    --whatsapp-bg: #15803d;
-    --whatsapp-hover: #166534;
+    --whatsapp-bg: #16a34a;
+    --whatsapp-hover: #15803d;
     --whatsapp-ink: #ffffff;
 
-    --shadow-xs: 0 1px 2px rgba(7, 3, 18, 0.42);
-    --shadow-sm: 0 3px 10px rgba(7, 3, 18, 0.45);
-    --shadow-md: 0 12px 30px rgba(7, 3, 18, 0.55);
-    --shadow-lg: 0 24px 56px rgba(7, 3, 18, 0.72);
+    --beta-bg: color-mix(in srgb, #c084fc 24%, transparent);
+    --beta-text: #e9d5ff;
 
-    --brand-primary-soft: color-mix(in srgb, #c084fc 17%, var(--surface-card));
-    --brand-accent-soft: color-mix(in srgb, #38d9c0 16%, var(--surface-card));
+    --toast-bg: #241a40;
+    --toast-ink: #f6f2ff;
+    --toast-success-bg: #065f46;
+    --toast-success-border: #34d399;
+    --toast-error-bg: #9f1239;
+    --toast-error-border: #fb7185;
+
+    --surface-sheen: rgba(216, 180, 254, 0.07);
+    --border-glass: rgba(216, 180, 254, 0.18);
+    --focus-ring: color-mix(in srgb, var(--border-focus) 34%, transparent);
+    --select-chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23a494ca' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+    --shadow-xs: 0 1px 2px rgba(7, 3, 18, 0.42), 0 1px 1px rgba(7, 3, 18, 0.24);
+    --shadow-sm: 0 1px 3px rgba(7, 3, 18, 0.36), 0 6px 16px -4px rgba(7, 3, 18, 0.48);
+    --shadow-md: 0 4px 12px -2px rgba(7, 3, 18, 0.44), 0 16px 32px -8px rgba(7, 3, 18, 0.6);
+    --shadow-lg: 0 10px 24px -4px rgba(7, 3, 18, 0.56), 0 28px 60px -12px rgba(7, 3, 18, 0.78);
+    --shadow-glow-primary: 0 0 0 1px color-mix(in srgb, var(--brand-primary) 34%, transparent), 0 8px 24px -8px color-mix(in srgb, var(--brand-primary) 38%, transparent);
+
+    --brand-primary-soft: color-mix(in srgb, #c084fc 16%, var(--surface-card));
+    --brand-accent-soft: color-mix(in srgb, #2dd4bf 15%, var(--surface-card));
     --status-ok-bg: color-mix(in srgb, var(--status-ok) 15%, var(--surface-card));
     --status-warn-bg: color-mix(in srgb, var(--status-warn) 16%, var(--surface-card));
     --status-danger-bg: color-mix(in srgb, var(--status-danger) 17%, var(--surface-card));
     --status-info-bg: color-mix(in srgb, var(--status-info) 18%, var(--surface-card));
     --status-neutral-bg: color-mix(in srgb, var(--status-neutral) 16%, var(--surface-card));
+  }
+
+  /* En escritorio con puntero fino podemos refinar controles compactos sin afectar táctil */
+  @media (min-width: 1024px) and (pointer: fine) {
+    :root {
+      --target-size: 40px;
+    }
   }
 
   @media (pointer: coarse) {
@@ -265,20 +362,23 @@
 
   html {
     scroll-behavior: smooth;
-    scroll-padding-top: calc(var(--topbar-h) + 74px + env(safe-area-inset-top, 0px));
-    scroll-padding-bottom: calc(var(--bottom-nav-h) + 2rem + env(safe-area-inset-bottom, 0px));
+    scroll-padding-top: calc(var(--topbar-h) + 72px + env(safe-area-inset-top, 0px));
+    scroll-padding-bottom: calc(var(--bottom-nav-h) + var(--space-8) + env(safe-area-inset-bottom, 0px));
+    -webkit-text-size-adjust: 100%;
   }
 
   body {
     margin: 0;
     font-family: var(--font-sans);
     font-size: var(--fs-body);
-    line-height: 1.5;
+    line-height: 1.55;
     color: var(--text-primary);
     background-color: var(--surface-canvas);
+    overflow-x: clip;
     overflow-wrap: break-word;
     -webkit-font-smoothing: antialiased;
-    transition: background-color 180ms ease, color 180ms ease;
+    -moz-osx-font-smoothing: grayscale;
+    transition: background-color var(--dur-base) ease, color var(--dur-base) ease;
   }
 
   img,
@@ -289,9 +389,11 @@
 
   h1, h2, h3, h4 {
     margin-block: 0;
+    font-family: var(--font-display);
     text-wrap: balance;
     color: var(--text-primary);
-    line-height: 1.24;
+    line-height: 1.22;
+    letter-spacing: -0.015em;
   }
 
   p, li {
@@ -300,6 +402,15 @@
 
   :where(a, code) {
     overflow-wrap: anywhere;
+  }
+
+  code {
+    font-family: var(--font-mono);
+    font-size: 0.88em;
+    padding: 0.08em 0.35em;
+    border-radius: var(--radius-xs);
+    background: var(--surface-sunken);
+    border: 1px solid var(--border-subtle);
   }
 }
 
@@ -323,25 +434,27 @@
   .skip-link {
     position: fixed;
     top: -120px;
-    inset-inline-start: 1rem;
-    z-index: 300;
+    inset-inline-start: var(--space-4);
+    z-index: var(--z-skip);
     background: var(--brand-primary-strong);
     color: var(--brand-primary-ink);
-    padding: 0.75rem 1.1rem;
+    padding: var(--space-3) var(--space-4);
     border-radius: var(--radius-sm);
     font-weight: 700;
     text-decoration: none;
     box-shadow: var(--shadow-md);
   }
   .skip-link:focus {
-    top: 0.75rem;
+    top: var(--space-3);
   }
 
   :where(a, button, input, select, textarea, [tabindex="0"]):focus-visible {
-    outline: 3px solid var(--border-focus);
+    outline: 2px solid var(--border-focus);
     outline-offset: 2px;
+    box-shadow: 0 0 0 4px var(--focus-ring);
   }
 
+  /* Garantía Mobile-First de objetivos táctiles >= 44px */
   :where(
     button,
     select,
